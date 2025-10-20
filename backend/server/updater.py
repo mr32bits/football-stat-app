@@ -1,47 +1,65 @@
-import tkinter as tk #for you it is pyqt5
+import sys
+import os
+import requests
+
+import tkinter
 from tkinter import *
-from tkinter import messagebox #MessageBox and Button
-import requests #pip install requests
-import os #part of standard library
-import sys #part of standard library
+from tkinter import ttk
 
-VERSION = 4
+VERSION = 4.0
 
-b1 = Button(frame, text = "Back", command = homepage)
-b1.pack(ipadx= 10, ipady = 10, fill = X, expand = False, side = TOP)
+def check_for_updates(self):
+    try:
+        link = "https://raw.githubusercontent.com/mr32bits/football-stat-app/main/app/version.txt"
+        response = requests.get(link)
+        online_version = float(response.text.strip())
 
-checkupdate = Label(frame, text = "Looking for updates", font = ("Arial", 14))
-checkupdate.pack()
+        if VERSION < online_version:
+            reply = tkinter.messagebox.askquestion(
+                "Update Available",
+                f"A new version ({online_version}) is available.\nDo you want to update?",
+            )
+            if reply == 'yes':
+                self.perform_update(online_version)
+            else:
+                self.status_label.setText("Update skipped.")
+        else:
+            tkinter.messagebox.showinfo("Up to date", "No updates are available.")
+            self.status_label.setText("You have the latest version.")
+    except Exception as e:
+        self.status_label.setText(f"Error checking updates: {e}")
 
-try:
-    link = "https://raw.githubusercontent.com/4/SomeRepo/main/SomeFolder/version.txt"
-    check = requests.get(link)
-    
-    if float(VERSION) < float(check.text):
-        mb1 = messagebox.askyesno('Update Available', 'There is an update available. Click yes to update.')
-        if mb1 is True:
-            filename = os.path.basename(sys.argv[0])
-
-            for file in os.listdir():
-                if file == filename:
+def perform_update(self, new_version):
+    try:
+        filename = os.path.basename(sys.argv[0])
+        for file in os.listdir():
+            if file != filename:
+                try:
+                    os.remove(file)
+                except Exception:
                     pass
 
-                else:
-                    os.remove(file)
+        # Choose correct file extension
+        if sys.platform == "win32":
+            new_filename = f"YourApp{new_version}.exe"
+            download_url = "https://raw.githubusercontent.com/mr32bits/football-stat-app/main/app/NewUpdate.exe"
+        else:
+            new_filename = f"YourApp{new_version}.app"
+            download_url = "https://raw.githubusercontent.com/mr32bits/football-stat-app/main/app/NewUpdate.app"
 
-            exename = f'NameOfYourApp{float(check.text)}.exe'
-            code = requests.get("https://raw.githubusercontent.com/SomeUser/SomeRepo/main/SomeFolder/NewUpdate.exe", allow_redirects = True)
-            open(exename, 'wb').write(code.content)
+        code = requests.get(download_url, allow_redirects=True)
+        with open(new_filename, "wb") as f:
+            f.write(code.content)
 
-            root.destroy()
-            os.remove(sys.argv[0])
-            sys.exit()
-            
-        elif mb1 == 'No':
-            pass
-        
-    else:
-        messagebox.showinfo('Updates Not Available', 'No updates are available')
+        # Remove old app
+        os.remove(sys.argv[0])
+        os.execv(new_filename, sys.argv)
 
-except Exception as e:
-    pass
+    except Exception as e:
+        QMessageBox.critical(self, "Update Failed", f"Error: {e}")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = UpdateChecker()
+    window.show()
+    sys.exit(app.exec_())
