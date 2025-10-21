@@ -1,13 +1,9 @@
-# Football-Stats App
+# Football Stat App
 
-This is a local backend running `django` application using `electron` for football statistics.
-
----
-
-Running
+# Development Process
 
 ```zsh
-cd server
+cd backend/server
 python3 manage.py runserver
 ```
 
@@ -18,30 +14,12 @@ cd frontend
 npm run dev
 ```
 
-Results in a dev-environment.
+## Build Process
 
 ```zsh
-#windows
-pyinstaller --onefile ^
-    --name DjangoLauncher ^
-    --add-data "backend/server;backend/server" ^
-    --hidden-import=corsheaders ^
-    --collect-all rest_framework ^
-    launcher.py#TODO
-
-#mac/linux
-pyinstaller --onefile \
-    --name DjangoLauncher \
-    --add-data 'backend/server:backend/server' \
-    --add-data 'backend/server/server:backend/server/server' \
-    --add-data 'backend/server/api:backend/server/api' \
-    --hidden-import=django \
-    --hidden-import=corsheaders \
-    --collect-all rest_framework \
-    launcher.py
+cd backend/server
+pyinstaller server.spec
 ```
 
-```zsh
-export DJANGO_SETTINGS_MODULE=settings
-pyinstaller --name=server manage.py
-```
+For a new Version change the version in `updater.py` and change the version.txt in `/app`.  
+In the Format of `Version('x.x.x')` or `x.x.x`.

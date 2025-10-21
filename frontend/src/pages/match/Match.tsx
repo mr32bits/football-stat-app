@@ -46,7 +46,7 @@ export type PlayerParams = {
   team_id: number;
 };
 export type SeasonParams = {
-  year: number;
+  season_year: number;
   id: number;
 }[];
 
@@ -151,7 +151,7 @@ function Match() {
                           {seasons
                             ? seasons?.find(
                                 (s) => s.id === match.match.season_id
-                              )?.year
+                              )?.season_year
                             : "Season for id '" +
                               match.match.season_id +
                               "' not found!"}

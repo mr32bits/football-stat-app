@@ -166,7 +166,7 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
 
   const fetchData = async () => {
     try {
-      const seasonResponse = await fetch(`${API_URL}/seasons`);
+      const seasonResponse = await fetch(`${API_URL}/seasons/`);
       if (!seasonResponse.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -183,7 +183,7 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
-      const response = await fetch(API_URL + "/creatematch", {
+      const response = await fetch(API_URL + "/match/create/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -280,7 +280,7 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
                                 key={season.id}
                                 value={season.id.toString()}
                               >
-                                {season.year}
+                                {season.season_year}
                               </SelectItem>
                             ))
                           ) : (

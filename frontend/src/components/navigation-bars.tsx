@@ -631,7 +631,7 @@ export function MatchNavBar({
                           key={season.id}
                           value={season.id.toString()}
                         >
-                          {season.year}
+                          {season.season_year}
                         </SelectItem>
                       ))
                     ) : (

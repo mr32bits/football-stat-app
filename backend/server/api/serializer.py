@@ -34,6 +34,15 @@ class MatchSerializer(serializers.ModelSerializer):
     team2_id = serializers.PrimaryKeyRelatedField(
         queryset=Team.objects.all(), source='team2', write_only=True
     )
+    
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        team1 = data.get('team1')
+        team2 = data.get('team2')
+
+        if team1 == team2:
+            raise serializers.ValidationError("Given Teams are the same.")
+        return data
 
     class Meta:
         model = Match

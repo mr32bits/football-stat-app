@@ -6,7 +6,7 @@ class Season(models.Model):
     season_year = models.IntegerField(unique=True)
 
     def __str__(self):
-        return str(self.season_year)
+        return f"{self.season_year}"
 
 
 class Team(models.Model):
@@ -29,7 +29,7 @@ class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     team1 = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team1_matches')
     team2 = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team2_matches')
-    match_date = models.DateTimeField(auto_now_add=True)
+    match_date = models.DateField()
     team1_score = models.IntegerField(default=0)
     team2_score = models.IntegerField(default=0)
 
@@ -37,7 +37,7 @@ class Match(models.Model):
         unique_together = ('season', 'match_date', 'team1', 'team2')
 
     def __str__(self):
-        return f"{self.team1} vs {self.team2} ({self.season})"
+        return f"{self.match_date.date().strftime('%d.%m.%Y')} ({self.season}) - {self.team1} vs {self.team2}"
 
 
 class PlayerMatch(models.Model):
