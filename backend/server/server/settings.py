@@ -10,11 +10,25 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 '''
 
+import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+APP_NAME = "FootballStat"
+if sys.platform == "darwin":
+    # macOS: ~/Library/Application Support/FootballStat
+    DATA_DIR = Path.home() / "Library" / "Application Support" / APP_NAME
+elif sys.platform == "win32":
+    # Windows: %APPDATA%\FootballStat
+    DATA_DIR = Path(os.getenv("APPDATA")) / APP_NAME
+else:
+    # Fallback for Linux or others
+    DATA_DIR = Path.home() / f".{APP_NAME.lower()}"
+
+os.makedirs(DATA_DIR, exist_ok=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -91,7 +105,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': DATA_DIR / 'db.sqlite3',
     }
 }
 

@@ -4,7 +4,7 @@ import sys
 import threading
 from tkinter import messagebox
 import webbrowser
-from django.core.management import execute_from_command_line
+from django.core.management import execute_from_command_line, call_command
 
 from tkinter import *
 from tkinter import ttk
@@ -35,10 +35,18 @@ def start_ui():
     ttk.Button(frm, text='Quit', command=root.destroy).pack()
     root.mainloop()
 
+def ensure_database_ready():
+    try:
+        execute_from_command_line(['manage.py', 'migrate'])
+        print("Database migrations applied successfully.")
+    except Exception as e:
+        print(f"Migration failed: {e}")
+
 if __name__ == '__main__':
 
     print('sys.argv[0]: ', sys.argv[0])
 
+    '''
     db_source = "db.sqlite3"
 
     path = Path(sys.argv[0]).absolute()
@@ -55,6 +63,7 @@ if __name__ == '__main__':
 
     with open(path, 'rb') as f:
         reply = messagebox.askquestion('', f'{f.read()[:20]}')
-
+    '''
     check_for_updates()
-    #start_ui()
+    ensure_database_ready()
+    start_ui()

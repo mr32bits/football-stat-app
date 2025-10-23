@@ -1,39 +1,55 @@
-class Version(object):
+import re
 
+class Version(object):
     def __init__(self, version:str):
-        self.version = version.strip().split('.')
+        regex = r'^v(\d+).(\d+).(\d+)(?:-(alpha|beta))?$'
+        pattern = re.compile(regex)
+        match = pattern.match(version)
+        if not match:
+            raise ValueError(f"Invalid version string: {version}")
+        major, minor, patch, stage = match.groups()
+        self.major = int(major)
+        self.minor = int(minor)
+        self.patch = int(patch)
+        self.stage = stage or "final"  # default to final release
+        self.stage_order = {"alpha": 0, "beta": 1, "final": 2}
 
     def __eq__(self, other):
-        return self.version == other.version
+        return (
+            self.major == other.major and
+            self.minor == other.minor and
+            self.patch == other.patch and
+            self.stage == other.stage
+        )
     
     def __ne__(self, other):
         return not self.__eq__(other)
     
     def __lt__ (self, other):
-        for version1, version2 in zip(self.version, other.version):
-            if float(version1) < float(version2):
-                return True
-            elif float(version1) > float(version2):
-                return False
-        return False
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+        return self.stage_order[self.stage] < self.stage_order[other.stage]
 
     def __gt__ (self, other):
         return other.__lt__(self)
     
     def __ge__(self, other):
-        return self.__gt__(other) or self.__eq__(other)
+        return not self.__lt__(other)
     
     def __le__(self, other):
-        return self.__lt__(other) or self.__eq__(other)
+        return not self.__gt__(other)
     
     def __str__(self):
-        s = '.'.join(self.version)
+        s = f"v{self.major}.{self.minor}.{self.patch}"
+        if self.stage != "final":
+            s += f"-{self.stage}"
         return s
     
 if __name__ == '__main__':
-    print(Version('1.1.3') == Version('1.2.3'))
-    print(Version('1.1.3') != Version('1.2.3'))
-    print(Version('2.1.3') > Version('1.2.3'))
-    print(Version('2.1.3') < Version('1.2.3'))
-    print(Version('1.2.3') >= Version('1.2.3'))
-    print(Version('1.2.3') <= Version('1.2.3'))
+    n = (Version('v1.3.3'))
+    l = (Version('v1.2.3'))
+    alpha = (Version('v1.2.3-alpha'))
+    beta = (Version('v1.2.3-beta'))
+    print(l>n)
+    print(alpha<beta)
+    print(n, l , alpha, beta)

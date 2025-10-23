@@ -61,6 +61,8 @@ coll = COLLECT(
 app = BUNDLE(exe,
     a.binaries,
     a.datas,
+    upx=True,
+    upx_exclude=[],
     name='server.app',
     icon=None,
     bundle_identifier=None
