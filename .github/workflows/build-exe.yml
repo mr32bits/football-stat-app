@@ -28,7 +28,14 @@ jobs:
 
       - name: Zip the executable
         run: |
-          powershell Compress-Archive -Path dist\server\server.exe -DestinationPath build.zip
+          ls
+          $exePath = Get-ChildItem -Path dist -Recurse -Filter server.exe | Select-Object -First 1
+          if (-not $exePath) {
+            Write-Error "Could not find server.exe in dist/"
+            exit 1
+          }
+          Write-Host "Found EXE at $($exePath.FullName)"
+          Compress-Archive -Path $exePath.FullName -DestinationPath build.zip -Force
 
       - name: Upload zipped build artifact
         uses: actions/upload-artifact@v4
