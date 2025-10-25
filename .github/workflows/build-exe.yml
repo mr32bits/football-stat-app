@@ -28,17 +28,16 @@ jobs:
 
       - name: Zip the executable
         run: |
-          cd backend/server
-          $exePath = Get-ChildItem -Path dist -Recurse -Filter server.exe | Select-Object -First 1
+          $exePath = Get-ChildItem -Path backend/server/dist -Recurse -Filter server.exe | Select-Object -First 1
           if (-not $exePath) {
             Write-Error "Could not find server.exe in dist/"
             exit 1
           }
           Write-Host "Found EXE at $($exePath.FullName)"
-          Compress-Archive -Path $exePath.FullName -DestinationPath build.zip -Force
+          Compress-Archive -Path $exePath.FullName -DestinationPath win.zip -Force
 
       - name: Upload zipped build artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe
-          path: build.zip
+          path: win.zip
