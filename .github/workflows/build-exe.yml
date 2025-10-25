@@ -28,7 +28,7 @@ jobs:
 
       - name: Zip the executable
         run: |
-          ls
+          cd backend/server
           $exePath = Get-ChildItem -Path dist -Recurse -Filter server.exe | Select-Object -First 1
           if (-not $exePath) {
             Write-Error "Could not find server.exe in dist/"
