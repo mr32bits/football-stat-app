@@ -33,7 +33,7 @@ def check_for_updates(active: bool = False):
                 print("Update skipped.")
         else:
             if active:
-                messagebox.showinfo("Up to date", "No updates are available.")
+                messagebox.showinfo("Up to date", f"No updates are available.\nCurrent Version: {VERSION}")
             print("Already up to date.")
 
     except Exception as e:
