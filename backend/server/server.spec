@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import os
+import sys
 
 spec_root = os.path.abspath('')
 server_path = spec_root + '/server'
@@ -48,6 +49,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
@@ -58,12 +60,13 @@ coll = COLLECT(
     name='server',
 )
 
-app = BUNDLE(exe,
-    a.binaries,
-    a.datas,
-    upx=True,
-    upx_exclude=[],
-    name='server.app',
-    icon=None,
-    bundle_identifier=None
-)
+if sys.platform == "darwin":
+    app = BUNDLE(exe,
+        a.binaries,
+        a.datas,
+        upx=True,
+        upx_exclude=[],
+        name='server.app',
+        icon=None,
+        bundle_identifier=None
+    )

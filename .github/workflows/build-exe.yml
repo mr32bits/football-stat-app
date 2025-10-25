@@ -24,11 +24,11 @@ jobs:
       - name: Build executable with PyInstaller
         run: |
           cd backend/server
-          pyinstaller server.spec
+          pyinstaller --clean server.spec
 
       - name: Zip the executable
         run: |
-          powershell Compress-Archive -Path dist\main.exe -DestinationPath build.zip
+          powershell Compress-Archive -Path dist\server\server.exe -DestinationPath build.zip
 
       - name: Upload zipped build artifact
         uses: actions/upload-artifact@v4
