@@ -35,8 +35,10 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.datas,
     [],
-    exclude_binaries=True,
+    exclude_binaries=True if sys.platform == "darwin" else False,
     name='server',
     debug=False,
     bootloader_ignore_signals=False,

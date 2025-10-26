@@ -24,7 +24,7 @@ jobs:
       - name: Build executable with PyInstaller
         run: |
           cd backend/server
-          pyinstaller --clean server.spec
+          pyinstaller --clean --noconfirm server.spec
 
       - name: Zip the executable
         run: |
@@ -34,10 +34,10 @@ jobs:
             exit 1
           }
           Write-Host "Found EXE at $($exePath.FullName)"
-          Compress-Archive -Path $exePath.FullName -DestinationPath win.zip -Force
+          Compress-Archive -Path $exePath.FullName -DestinationPath build.zip -Force
 
       - name: Upload zipped build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-exe
-          path: win.zip
+          name: win
+          path: build.zip
