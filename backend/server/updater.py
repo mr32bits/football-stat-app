@@ -143,31 +143,20 @@ def perform_update(new_version: Version, r: requests.Response):
 
         # --- Windows: Replace extracted files in place ---
         elif sys.platform == "win32":
-            current_dir = Path(sys.argv[0]).parent
-            print(f"Replacing files in {current_dir}")
+            exe_path = Path(sys.argv[0]).resolve()
+            current_dir = exe_path.parent
 
-            for item in os.listdir(temp_dir):
-                src = Path(temp_dir) / item
-                dst = current_dir / item
-
-                if dst.name.lower() == "db.sqlite3":
-                    continue  # keep existing database
-
-                if dst.is_dir():
-                    shutil.rmtree(dst, ignore_errors=True)
-                if src.is_dir():
-                    shutil.copytree(src, dst, dirs_exist_ok=True)
-                else:
-                    shutil.copy2(src, dst)
-
-            shutil.rmtree(temp_dir, ignore_errors=True)
-
-            print(f"Update to version {new_version} installed successfully.")
-            messagebox.showinfo("Update Complete", f"Updated to version {new_version}")
-
-            # Restart the app
-            os.execv(sys.executable, [sys.executable] + sys.argv)
-
+            # Prevent updating if the app is run from root or restricted directories
+            if current_dir == Path("C:\\") or not os.access(current_dir, os.W_OK):
+                fallback_dir = Path.home() / "Downloads" / f"FootballStat_{new_version}"
+                fallback_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(temp_dir, fallback_dir, dirs_exist_ok=True)
+                messagebox.showinfo(
+                    "Manual Update Required",
+                    f"The new version has been downloaded to:\n\n{fallback_dir}\n\n"
+                    "Please move it manually to your preferred install folder."
+                )
+                return
         else:
             print("Unsupported platform for auto-update.")
             messagebox.showwarning("Update", "Automatic updates are not supported on this platform.")
