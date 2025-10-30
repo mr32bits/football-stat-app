@@ -7,18 +7,15 @@ class SeasonSerializer(serializers.ModelSerializer):
         model = Season
         fields = ['id', 'season_year']
 
-
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
         fields = ['id', 'team_name']
 
-
 class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
         fields = ['id', 'player_uuid', 'player_name']
-
 
 class MatchSerializer(serializers.ModelSerializer):
     season = SeasonSerializer(read_only=True)
@@ -52,7 +49,6 @@ class MatchSerializer(serializers.ModelSerializer):
             'match_date', 'team1_score', 'team2_score'
         ]
 
-
 class PlayerMatchSerializer(serializers.ModelSerializer):
     player = PlayerSerializer(read_only=True)
     match = MatchSerializer(read_only=True)
@@ -75,3 +71,32 @@ class PlayerMatchSerializer(serializers.ModelSerializer):
             'player_id', 'match_id', 'team_id',
             'goals_scored', 'own_goals_scored'
         ]
+
+
+class PlayerMiniSerializer(serializers.ModelSerializer):
+    team_id = serializers.IntegerField(source="team.id", read_only=True)
+
+    class Meta:
+        model = PlayerMatch
+        fields = ["id", "player", "team_id", "goals_scored", "own_goals_scored"]
+        depth = 1
+
+class PlayerStatsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    player_uuid = serializers.UUIDField()
+    player_name = serializers.CharField()
+    matches_played = serializers.IntegerField()
+    goals_scored = serializers.IntegerField()
+    own_goals_scored = serializers.IntegerField()
+
+    class Meta:
+        model = Player
+        fields = [
+            "id",
+            "player_uuid",
+            "player_name",
+            "matches_played",
+            "goals_scored",
+            "own_goals_scored",
+        ]
+

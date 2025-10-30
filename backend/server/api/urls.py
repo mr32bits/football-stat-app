@@ -18,7 +18,10 @@ urlpatterns = [
     path('players/create/', Players.PlayersPOST.as_view()),
     path('players/<uuid:player_uuid>', Players.PlayersEDIT.as_view()), 
 
-    path('playermatches/', PlayerMatches.PlayerMatchesGET.as_view()),
-    path('playermatches/create/', PlayerMatches.PlayerMatchesPOST.as_view()),
-    #path('playermatches/<id>', PlayerMatches.PlayerMatchesEDIT.as_view()), 
+    path("players/stats/", PlayerStatsListView.as_view(), name="player-stats"),
+    path("players/<uuid:player_uuid>/stats/", PlayerStatsView.as_view(), name="player-stats"),
+
+    path('pm/', PlayerMatches.PlayerMatchesGET.as_view()),
+    path('pm/create/', PlayerMatches.PlayerMatchesPOST.as_view()),
+    path('pm/<int:pk>', PlayerMatches.PlayerMatchesEDIT.as_view()),
 ]

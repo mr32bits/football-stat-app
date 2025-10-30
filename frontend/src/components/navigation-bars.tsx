@@ -6,7 +6,6 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { NavModeToggle } from "./mode-toggle";
-import i18next from "i18next";
 import { useEffect, useId, useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -47,7 +46,7 @@ import {
 } from "./ui/alert-dialog";
 import { AddMatchDialog, AddPlayerDialog } from "./dialog";
 import { DatePicker } from "./date-picker";
-import { dateFormat } from "@/util";
+import { dateFormat, formatDate } from "@/util";
 import { Separator } from "./ui/separator";
 import {
   Table,
@@ -57,7 +56,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { PlayerParams, SeasonParams } from "@/pages/match/Match";
 import {
   Select,
   SelectContent,
@@ -66,8 +64,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { useTranslation } from "react-i18next";
 
 export function MenuBar() {
+  const { t } = useTranslation();
+
   useEffect(() => {
     const handleKeyDown = (event: {
       metaKey: any;
@@ -115,17 +116,17 @@ export function MenuBar() {
       </MenubarMenu>
       <MenubarMenu>
         <MenubarTrigger className="bg-background">
-          {i18next.t("Players")}
+          {t("Players")}
         </MenubarTrigger>
         <MenubarContent>
           <MenubarItem onSelect={() => navigate("/players")}>
-            {i18next.t("MenuBar.Players.Open")}
+            {t("MenuBar.Players.Open")}
             {/*<MenubarShortcut>⌘K</MenubarShortcut>*/}
           </MenubarItem>
           <AddPlayerDialog
             trigger={
               <MenubarItem onSelect={(e) => e.preventDefault()}>
-                {i18next.t("MenuBar.Players.New")}
+                {t("MenuBar.Players.New")}
               </MenubarItem>
             }
           />
@@ -133,16 +134,16 @@ export function MenuBar() {
       </MenubarMenu>
       <MenubarMenu>
         <MenubarTrigger className="bg-background">
-          {i18next.t("Matches")}
+          {t("Matches")}
         </MenubarTrigger>
         <MenubarContent>
           <MenubarItem onSelect={() => navigate("/matches")}>
-            {i18next.t("MenuBar.Matches.Open")}
+            {t("MenuBar.Matches.Open")}
           </MenubarItem>
           <AddMatchDialog
             trigger={
               <MenubarItem onSelect={(e) => e.preventDefault()}>
-                {i18next.t("MenuBar.Matches.New")}
+                {t("MenuBar.Matches.New")}
               </MenubarItem>
             }
           />
@@ -180,20 +181,22 @@ export function PlayerNavBar({
   uuid: string;
   fetchFn: () => any;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const id = useId();
   const [name, setName] = useState(_name);
+  const [title, setTitle] = useState(name);
 
   async function handleSubmit() {
     if (name === _name) {
-      console.warn("Name did not change on submit!");
+      console.log("Name did not change, no submit!");
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/editplayer`, {
-        method: "POST",
-        body: JSON.stringify({ uuid: uuid, name: name }),
+      const response = await fetch(`${API_URL}/players/` + uuid, {
+        method: "PUT",
+        body: JSON.stringify({ player_uuid: uuid, player_name: name }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -212,24 +215,22 @@ export function PlayerNavBar({
   }
   async function handleDelete() {
     try {
-      const response = await fetch(`${API_URL}/deleteplayer`, {
+      const response = await fetch(`${API_URL}/players/` + uuid, {
         method: "DELETE",
-        body: JSON.stringify({ uuid: uuid }),
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
       if (!response.ok) {
         throw new Error(
           `Server error: ${response.status} ${response.statusText}`
         );
       }
-      const data = await response.json();
-      console.log("Success:", data);
+      let data = null;
+      const text = await response.text();
+      if (text) data = JSON.parse(text);
+      console.log("Success:", data ?? "Deleted successfully, no response body");
+      setTitle("Successfully DELETED");
     } catch (error) {
       console.error("Request failed:", error);
     }
-    navigate("/players");
   }
 
   return (
@@ -244,7 +245,7 @@ export function PlayerNavBar({
       </Button>
       <div className="flex-1 flex items-center justify-center h-auto border-x">
         <span className="text-sm text-muted-foreground">
-          {_name ? _name : ""}
+          {title ? title : ""}
         </span>
       </div>
       <Button
@@ -268,20 +269,20 @@ export function PlayerNavBar({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {i18next.t("PlayerPage.Delete", { count: 1 })}
+              {t("PlayerPage.Delete", { count: 1 })}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {i18next.t("PlayerPage.DeleteInfo", { name: _name, count: 1 })}
+              {t("PlayerPage.DeleteInfo", { name: _name, count: 1 })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18next.t("Cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 handleDelete();
               }}
             >
-              {i18next.t("Delete")}
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -298,15 +299,15 @@ export function PlayerNavBar({
         </SheetTrigger>
         <SheetContent className="w-screen md:w-1/2">
           <SheetHeader>
-            <SheetTitle>{i18next.t("PlayerPage.Edit")}</SheetTitle>
+            <SheetTitle>{t("PlayerPage.Edit")}</SheetTitle>
             <SheetDescription>
-              {i18next.t("PlayerPage.EditInfo", { name: _name })}
+              {t("PlayerPage.EditInfo", { name: _name })}
             </SheetDescription>
           </SheetHeader>
           <div className="grid gap-2 py-4 my-1">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor={id} className="text-right">
-                {i18next.t("Name")}
+                {t("Name")}
               </Label>
               <Input
                 id={id}
@@ -323,12 +324,12 @@ export function PlayerNavBar({
             <div className="flex sm:flex-col flex-row justify-stretch gap-3 w-full">
               <SheetClose asChild>
                 <Button type="submit" className="w-full" onClick={handleSubmit}>
-                  {i18next.t("SaveChanges")}
+                  {t("SaveChanges")}
                 </Button>
               </SheetClose>
               <SheetClose asChild>
                 <Button variant="destructive" className="w-full">
-                  {i18next.t("Cancel")}
+                  {t("Cancel")}
                 </Button>
               </SheetClose>
             </div>
@@ -338,66 +339,79 @@ export function PlayerNavBar({
     </Card>
   );
 }
+
+export type SimplifiedPlayerParams = {
+  player_uuid: string;
+  player_id: number;
+  goals_scored: number;
+  own_goals_scored: number;
+};
+
 export function MatchNavBar({
   match_uuid,
   match_id,
   match_date,
   team_1Players,
   team_2Players,
+  team1,
+  team2,
   match_season_id,
   fetchFn,
 }: {
   match_uuid: string;
   match_id: number;
   match_date: Date | undefined;
-  team_1Players: PlayerParams[];
-  team_2Players: PlayerParams[];
+  team_1Players: SimplifiedPlayerParams[];
+  team_2Players: SimplifiedPlayerParams[];
+  team1:
+    | {
+        id: number;
+        team_name: string;
+      }
+    | undefined;
+  team2:
+    | {
+        id: number;
+        team_name: string;
+      }
+    | undefined;
   match_season_id: number;
   fetchFn: () => any;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const date_id = useId();
   const season_id = useId();
 
   const [team1Players, setTeam1Players] =
-    useState<PlayerParams[]>(team_1Players);
+    useState<SimplifiedPlayerParams[]>(team_1Players);
   const [team2Players, setTeam2Players] =
-    useState<PlayerParams[]>(team_2Players);
+    useState<SimplifiedPlayerParams[]>(team_2Players);
 
   const [date, setDate] = useState<Date | undefined>(match_date);
   const [seasonID, setSeasonID] = useState<number>(match_season_id);
   const [, setPlayers] = useState<
-    | {
-        attended_games: number;
-        goals: number;
-        id: number;
-        name: string;
-        own_goals: number;
-        uuid: string;
-      }[]
-    | null
+    { id: number; player_uuid: string; player_name: string }[] | null
   >(null);
   const [possiblePlayers, setPossiblePlayers] = useState<
+    { id: number; player_uuid: string; player_name: string }[] | null
+  >(null);
+  const [seasons, setSeasons] = useState<
     | {
-        attended_games: number;
-        goals: number;
         id: number;
-        name: string;
-        own_goals: number;
-        uuid: string;
+        season_year: number;
       }[]
     | null
   >(null);
-  const [seasons, setSeasons] = useState<SeasonParams | null>(null);
   const [, setLoading] = useState<boolean>(true);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [playersResponse, seasonResponse] = await Promise.all([
-        fetch(`${API_URL}/players`),
-        fetch(`${API_URL}/seasons`),
+        fetch(`${API_URL}/players/`),
+        fetch(`${API_URL}/seasons/`),
       ]);
       if (!playersResponse.ok || !seasonResponse.ok) {
         throw new Error("Failed to fetch data");
@@ -426,15 +440,32 @@ export function MatchNavBar({
 
   async function handleSubmit() {
     try {
-      const response = await fetch(`${API_URL}/editmatch`, {
-        method: "POST",
+      console.log(team1Players, team2Players);
+      const response = await fetch(`${API_URL}/matches/` + match_uuid, {
+        method: "PUT",
         body: JSON.stringify({
           match_uuid: match_uuid,
           match_id: match_id,
-          match_date: date,
+          match_date: formatDate(match_date ? match_date : ""),
           season_id: seasonID,
-          team1Players: team1Players.filter((p) => p.player_id !== -1),
-          team2Players: team2Players.filter((p) => p.player_id !== -1),
+          team1_id: team1?.id ?? 1,
+          team2_id: team2?.id ?? 2,
+          team1Players: team1Players
+            .filter((p) => p.player_id && p.player_id >= 0)
+            .map((p) => ({
+              player_uuid: p.player_uuid ?? "",
+              player_id: p.player_id ?? -1,
+              goals_scored: p.goals_scored ?? 0,
+              own_goals_scored: p.own_goals_scored ?? 0,
+            })),
+          team2Players: team2Players
+            .filter((p) => p.player_id && p.player_id >= 0)
+            .map((p) => ({
+              player_uuid: p.player_uuid ?? "",
+              player_id: p.player_id ?? -1,
+              goals_scored: p.goals_scored ?? 0,
+              own_goals_scored: p.own_goals_scored ?? 0,
+            })),
         }),
         headers: {
           "Content-Type": "application/json",
@@ -454,7 +485,7 @@ export function MatchNavBar({
   }
   async function handleDelete() {
     try {
-      const response = await fetch(`${API_URL}/deletematch`, {
+      const response = await fetch(`${API_URL}/match/` + match_uuid, {
         method: "DELETE",
         body: JSON.stringify({ match_uuid: match_uuid, match_id: match_id }),
         headers: {
@@ -476,28 +507,20 @@ export function MatchNavBar({
 
   const handleAddTeam1Player = () => {
     const newPlayer = {
-      goals_scored: 0,
-      match_id: match_id,
-      own_goals_scored: 0,
-      player_id: -1,
-      player_match_id: -1,
-      player_name: "",
       player_uuid: "",
-      team_id: 1,
+      player_id: -1,
+      goals_scored: 0,
+      own_goals_scored: 0,
     };
     setTeam1Players([...team1Players, newPlayer]);
   };
 
   const handleAddTeam2Player = () => {
     const newPlayer = {
-      goals_scored: 0,
-      match_id: match_id,
-      own_goals_scored: 0,
-      player_id: -1,
-      player_match_id: -1,
-      player_name: "",
       player_uuid: "",
-      team_id: 2,
+      player_id: -1,
+      goals_scored: 0,
+      own_goals_scored: 0,
     };
     setTeam2Players([...team2Players, newPlayer]);
   };
@@ -552,9 +575,9 @@ export function MatchNavBar({
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18next.t("MatchPage.Delete")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("MatchPage.Delete")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {i18next.t("MatchPage.DeleteInfo", {
+              {t("MatchPage.DeleteInfo", {
                 name: match_date
                   ? dateFormat(match_date)
                   : "None or Invalid Date!",
@@ -562,18 +585,18 @@ export function MatchNavBar({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18next.t("Cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 handleDelete();
               }}
             >
-              {i18next.t("Delete")}
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* Editing */}
+
       <Sheet>
         <SheetTrigger asChild>
           <Button
@@ -586,9 +609,9 @@ export function MatchNavBar({
         </SheetTrigger>
         <SheetContent className="max-h-screen overflow-y-scroll w-full sm:max-w-screen max-w-[1200px] min-w-[750px]">
           <SheetHeader>
-            <SheetTitle>{i18next.t("MatchPage.Edit")}</SheetTitle>
+            <SheetTitle>{t("MatchPage.Edit")}</SheetTitle>
             <SheetDescription>
-              {i18next.t("MatchPage.EditInfo", {
+              {t("MatchPage.EditInfo", {
                 name: match_date
                   ? dateFormat(match_date)
                   : "None or Invalid Date!",
@@ -598,7 +621,7 @@ export function MatchNavBar({
           <div className="grid gap-2 py-4 my-1">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor={date_id} className="text-right">
-                {i18next.t("Match Date")}
+                {t("Match Date")}
               </Label>
               <div id={date_id}>
                 <DatePicker date={date ? date : new Date()} set={setDate} />
@@ -606,7 +629,7 @@ export function MatchNavBar({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor={season_id} className="text-right">
-                {i18next.t("Season")}
+                {t("Season")}
               </Label>
               <div id={season_id}>
                 <Select
@@ -622,21 +645,23 @@ export function MatchNavBar({
                   }}
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={i18next.t("Season")} />
+                    <SelectValue placeholder={t("Season")} />
                   </SelectTrigger>
                   <SelectContent className="max-h-[160px]">
                     {seasons && seasons?.length > 0 ? (
-                      seasons.map((season) => (
-                        <SelectItem
-                          key={season.id}
-                          value={season.id.toString()}
-                        >
-                          {season.season_year}
-                        </SelectItem>
-                      ))
+                      seasons
+                        .sort((a, b) => b.season_year - a.season_year)
+                        .map((season) => (
+                          <SelectItem
+                            key={season.id}
+                            value={season.id.toString()}
+                          >
+                            {season.season_year}
+                          </SelectItem>
+                        ))
                     ) : (
                       <SelectItem value="None" disabled>
-                        {i18next.t("Error.NoSeason")}
+                        {t("Error.NoSeason")}
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -656,17 +681,17 @@ export function MatchNavBar({
                 <TableRow>
                   <TableHead className="w-[45%] text-center">
                     <div className="grid grid-cols-6 items-center gap-2">
-                      <span className="col-span-4">{i18next.t("Name")}</span>
-                      <div className="col-span-1">{i18next.t("Own Goals")}</div>
-                      <div className="col-span-1">{i18next.t("Goals")}</div>
+                      <span className="col-span-4">{t("Name")}</span>
+                      <div className="col-span-1">{t("Own Goals")}</div>
+                      <div className="col-span-1">{t("Goals")}</div>
                     </div>
                   </TableHead>
                   <TableHead className="w-[10%] text-center">:</TableHead>
                   <TableHead className="w-[45%] text-center">
                     <div className="grid grid-cols-6 items-center gap-2">
-                      <div className="col-span-1">{i18next.t("Goals")}</div>
-                      <div className="col-span-1">{i18next.t("Own Goals")}</div>
-                      <span className="col-span-4">{i18next.t("Name")}</span>
+                      <div className="col-span-1">{t("Goals")}</div>
+                      <div className="col-span-1">{t("Own Goals")}</div>
+                      <span className="col-span-4">{t("Name")}</span>
                     </div>
                   </TableHead>
                 </TableRow>
@@ -677,19 +702,19 @@ export function MatchNavBar({
                     <TableRow key={index}>
                       {/* Team 1 Column */}
                       <TableCell className="text-right">
-                        {team1Players[index] ? (
+                        {team1Players && team1Players[index] ? (
                           <div className="grid grid-cols-6 items-center gap-2">
                             <Select
                               value={team1Players[index].player_uuid}
                               onValueChange={(val) => {
                                 const foundPlayer = possiblePlayers?.find(
-                                  (p) => p.uuid === val
+                                  (p) => p.player_uuid === val
                                 );
                                 const updatedPlayer = {
                                   ...team1Players[index],
                                   player_uuid: val,
                                   player_id: foundPlayer?.id ?? -1,
-                                  player_name: foundPlayer?.name ?? "",
+                                  player_name: foundPlayer?.player_name ?? "",
                                   player_match_id: -1,
                                 };
                                 const newTeam1 = [...team1Players];
@@ -720,23 +745,23 @@ export function MatchNavBar({
                                 possiblePlayers.length > 0 ? (
                                   possiblePlayers.map((p) => (
                                     <SelectItem
-                                      value={p.uuid}
-                                      key={p.uuid}
+                                      value={p.player_uuid}
+                                      key={p.player_uuid}
                                       disabled={
                                         team1Players.some(
                                           (player, i) =>
                                             i !== index &&
-                                            p.uuid === player.player_uuid
+                                            p.player_uuid === player.player_uuid
                                         ) ||
                                         team2Players.some(
                                           (player) =>
-                                            p.uuid === player.player_uuid
+                                            p.player_uuid === player.player_uuid
                                         )
                                           ? true
                                           : false
                                       }
                                     >
-                                      {p.name}
+                                      {p.player_name}
                                     </SelectItem>
                                   ))
                                 ) : (
@@ -745,7 +770,7 @@ export function MatchNavBar({
                                     value="NotFound"
                                     key={index}
                                   >
-                                    {i18next.t("Error.PlayerNotFound")}
+                                    {t("Error.PlayerNotFound")}
                                   </SelectItem>
                                 )}
                               </SelectContent>
@@ -787,7 +812,7 @@ export function MatchNavBar({
 
                       {/* Team 2 Column */}
                       <TableCell className="text-left">
-                        {team2Players[index] ? (
+                        {team2Players && team2Players[index] ? (
                           <div className="grid grid-cols-6 items-center gap-2">
                             <Input
                               className="col-span-1 text-right"
@@ -819,13 +844,13 @@ export function MatchNavBar({
                               value={team2Players[index].player_uuid}
                               onValueChange={(val) => {
                                 const foundPlayer = possiblePlayers?.find(
-                                  (p) => p.uuid === val
+                                  (p) => p.player_uuid === val
                                 );
                                 const updatedPlayer = {
                                   ...team2Players[index],
                                   player_uuid: val,
                                   player_id: foundPlayer?.id ?? -1,
-                                  player_name: foundPlayer?.name ?? "",
+                                  player_name: foundPlayer?.player_name ?? "",
                                   player_match_id: -1,
                                 };
                                 const newTeam2 = [...team2Players];
@@ -856,23 +881,23 @@ export function MatchNavBar({
                                 possiblePlayers.length > 0 ? (
                                   possiblePlayers.map((p) => (
                                     <SelectItem
-                                      value={p.uuid}
-                                      key={p.uuid}
+                                      value={p.player_uuid}
+                                      key={p.player_uuid}
                                       disabled={
                                         team2Players.some(
                                           (player, i) =>
                                             i !== index &&
-                                            p.uuid === player.player_uuid
+                                            p.player_uuid === player.player_uuid
                                         ) ||
                                         team1Players.some(
                                           (player) =>
-                                            p.uuid === player.player_uuid
+                                            p.player_uuid === player.player_uuid
                                         )
                                           ? true
                                           : false
                                       }
                                     >
-                                      {p.name}
+                                      {p.player_name}
                                     </SelectItem>
                                   ))
                                 ) : (
@@ -881,7 +906,7 @@ export function MatchNavBar({
                                     value="NotFound"
                                     key={index}
                                   >
-                                    {i18next.t("Error.PlayerNotFound")}
+                                    {t("Error.PlayerNotFound")}
                                   </SelectItem>
                                 )}
                               </SelectContent>
@@ -896,7 +921,7 @@ export function MatchNavBar({
                 ) : (
                   <TableRow>
                     <TableCell colSpan={3} className="text-center h-24">
-                      {i18next.t("Warning.NoResults")}
+                      {t("Warning.NoResults")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -948,12 +973,12 @@ export function MatchNavBar({
             <div className="flex sm:flex-col flex-row justify-stretch gap-3 w-full">
               <SheetClose asChild>
                 <Button type="submit" className="w-full" onClick={handleSubmit}>
-                  {i18next.t("SaveChanges")}
+                  {t("SaveChanges")}
                 </Button>
               </SheetClose>
               <SheetClose asChild>
                 <Button variant="destructive" className="w-full">
-                  {i18next.t("Cancel")}
+                  {t("Cancel")}
                 </Button>
               </SheetClose>
             </div>

@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { columns, SeasonData } from "./columns";
+import { useMatchColumns, MatchData } from "./columns";
 import { API_URL } from "../../constants/constants";
-//import ExampleTableWithSubRows from "./Test";
 import { MenuBar } from "@/components/navigation-bars";
 import { useSearchParams } from "react-router-dom";
 import { DataTable } from "./data-table";
 
 export default function Matches() {
-  const [data, setData] = useState<SeasonData[]>([]);
-  const [seasons, setSeasons] = useState<{ year: number; id: number }[]>([]);
+  const [data, setData] = useState<MatchData[]>([]);
 
   const [searchParams] = useSearchParams();
 
@@ -26,34 +24,24 @@ export default function Matches() {
       .then((data) => {
         console.log("API Response:", data);
 
-        setData(data.matches); // Adjust based on API response
-        setSeasons(data.seasons);
+        setData(data);
       })
       .catch((error) => console.error("API Fetch Error:", error));
   }, []);
-  const transformedData = data
-    .map((season) => {
-      const s = seasons.find((s) => s.id === season.season_id)?.year;
-      return season.matches.map((match) => ({
-        ...match,
-        season_id: season.season_id,
-        season_year: s ? s : 0,
-      }));
-    })
-    .flat();
+
+  const transformedData = data ? data : [];
+
+  console.log("transformedData: " + transformedData);
   return (
     <>
       <MenuBar />
       <div>{searchParams.get("player_uuid")}</div>
-      {console.log(transformedData)} {console.log(seasons[1])}
       <div className="container-wrapper">
         <div className="container mx-auto py-10">
           <DataTable
-            columns={columns}
+            columns={useMatchColumns()}
             data={transformedData ? transformedData : []}
           />
-
-          {/*<ExampleTableWithSubRows data={data} seasons={seasons} />*/}
         </div>
       </div>
     </>

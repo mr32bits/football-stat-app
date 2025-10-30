@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -14,15 +9,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import i18next from "i18next";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 
-const chartConfig = {
-  goals: { color: "hsl(var(--chart-1))", label: i18next.t("Goals") },
-} satisfies ChartConfig;
-
 export function GoalsChart({ data }: { data: Record<number, number> }) {
+  const { t } = useTranslation();
+
   const [chartData, setChartData] = useState<
     { match: number; goals: number }[]
   >([{ match: 0, goals: 0 }]);
@@ -36,6 +29,10 @@ export function GoalsChart({ data }: { data: Record<number, number> }) {
     }));
     setChartData(_data);
   }, [data]);
+
+  const chartConfig = {
+    goals: { color: "hsl(var(--chart-1))", label: t("Goals") },
+  } satisfies ChartConfig;
 
   return (
     <Card className="my-4 py-4 h-fit mx-auto">
@@ -91,7 +88,7 @@ export function GoalsChart({ data }: { data: Record<number, number> }) {
                     <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
                       {item.payload.match}
                       <span className="font-normal text-muted-foreground">
-                        {i18next.t("Goal", { count: item.payload.match })}
+                        {t("Goal", { count: item.payload.match })}
                       </span>
                     </div>
                   </>

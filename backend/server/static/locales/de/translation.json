@@ -1,0 +1,80 @@
+{
+    "Name": "Name",
+    "Delete": "Löschen",
+    "Cancel": "Abbrechen",
+    "Saving": "Speichern...",
+    "SaveChanges": "Änderungen Speichern",
+    "Goals": "Tore",
+    "Goal_one": "Tor",
+    "Goal_other": "Tore",
+    "Own Goals": "Eigentore",
+    "Attended Games": "Anzahl Spiele",
+    "Wins": "Siege",
+    "Draws": "Remis",
+    "Losses": "Niederlagen",
+    "Match Date": "Spieltag",
+    "Search...": "Suchen...",
+    "Player": "Spieler:in",
+    "Players": "Spieler",
+    "NumberOfPlayers": "Anzahl Spieler",
+    "Match": "Spiel",
+    "Matches_one": "Spiel",
+    "Matches_other": "Spiele",
+    "Season": "Saison",
+    "Match Result": "Spielergebnis",
+    "Match Results": "Spielergebnisse",
+    "Examples": "Beispiele",
+    "ColumnFilter": "Spaltenfilter",
+    "ColumnFilterInfo": "Suche nach Daten mithilfe von Spaltenfiltern.",
+    "MenuBar": {
+        "Players": {
+            "New": "Neuer Spieler",
+            "Open": "Öffne Spieler"
+        },
+        "Matches": {
+            "New": "Neues Spiel",
+            "Open": "Öffne Spiele"
+        },
+        "File": {}
+    },
+    "PlayerPage": {
+        "Edit": "Spieler bearbeiten",
+        "EditInfo": "Nehmen Sie hier Änderungen an dem Spieler '{{name}}' vor. Klicken Sie auf speichern, wenn Sie fertig sind.",
+        "Delete_one": "Spieler Löschen",
+        "Delete_other": "Lösche {{count}} Spieler",
+        "DeleteInfo_zero": "Kein Spieler wurde ausgewählt.",
+        "DeleteInfo_one": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird der Spieler:in '{{name}}' dauerhaft gelöscht und aus allen Spielen entfernt, jedoch bleiben die Ergebnisse der Spiele unverändert.",
+        "DeleteInfo_other": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch werden die ausgewählten Spieler:innen dauerhaft gelöscht und aus allen Spielen entfernt, jedoch bleiben die Ergebnisse der Spiele unverändert.",
+        "AddNewPlayer": "Erstelle neuen Spieler",
+        "AddNewPlayerInfo": "Erstelle hier einen neuen Spieler. Drücken Sie auf Speichern, wenn Sie fertig sind.."
+    },
+    "MatchPage": {
+        "Edit": "Spiel bearbeiten",
+        "EditInfo": "Nehmen Sie hier Änderungen an dem Spiel '{{name}}' vor. Klicken Sie auf speichern, wenn Sie fertig sind.",
+        "Delete_one": "Spiel Löschen",
+        "Delete_other": "Lösche {{count}} Spiele",
+        "DeleteInfo_zero": "Kein Spiel wurde ausgewählt.",
+        "DeleteInfo_one": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Spiel '{{name}}' dauerhaft gelöscht.",
+        "DeleteInfo_other": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch werden die ausgewählten Spiele dauerhaft gelöscht.",
+        "AddNewMatch": "Erstelle neues Spiel",
+        "AddNewMatchInfo": "Erstelle hier ein neues Spiel. Drücken Sie auf Speichern, wenn Sie fertig sind.."
+    },
+    "Pagination": {
+        "Selected": "{{value}} von {{length}} ausgewählte Reihen",
+        "RowPerPage": "Reihen pro Seite:",
+        "Page": "Seite {{value}} von {{length}}"
+    },
+    "Error": {
+        "PlayerNotFound": "FEHLER: Spieler nicht Gefunden!",
+        "MatchNotFound": "FEHLER: Spiel nicht Gefunden!",
+        "NoSeason": "FEHLER: Saisons nicht gefunden!",
+        "InvalidDate": "Ungültiges Datum",
+        "PageNotFound": {
+            "Message": "Oops! Seite wurde nicht gefunden",
+            "Back": "Zurück"
+        }
+    },
+    "Warning": {
+        "NoResults": "Kein Ergebnis."
+    }
+}

@@ -32,7 +32,6 @@ import type {
   ColumnDef,
   RowSelectionState,
   SortingState,
-  Updater,
 } from "@tanstack/react-table";
 import {
   flexRender,
@@ -78,7 +77,7 @@ const ExampleTableWithSubRows: React.FC<{
   const columns = React.useMemo<ColumnDef<SeasonData>[]>(
     () => [
       {
-        header: i18next.t("Season"),
+        header: t("Season"),
         accessorKey: "season_id",
         sortDescFirst: true,
         enableSorting: true,
@@ -111,7 +110,7 @@ const ExampleTableWithSubRows: React.FC<{
                     {row.original.matches.length}
                   </span>
                   <span>
-                    {i18next.t("Matches", {
+                    {t("Matches", {
                       count: row.original.matches.length,
                     })}
                   </span>
@@ -274,13 +273,11 @@ const ExampleTableWithSubRows: React.FC<{
                   stroke="hsl(var(--muted-foreground))"
                 />
                 <div className="space-y-1 ">
-                  <h4 className="text-sm font-semibold">
-                    {i18next.t("ColumnFilter")}
-                  </h4>
-                  <p className="text-sm">{i18next.t("ColumnFilterInfo")}</p>
+                  <h4 className="text-sm font-semibold">{t("ColumnFilter")}</h4>
+                  <p className="text-sm">{t("ColumnFilterInfo")}</p>
                   <div className="border rounded-md p-2 ">
                     <p className="text-sm font-bold text-muted-foreground">
-                      {i18next.t("Examples")}:{" "}
+                      {t("Examples")}:{" "}
                     </p>
                     <div className="text-sm italic text-muted-foreground">
                       <p>name:Alice</p>
@@ -299,7 +296,7 @@ const ExampleTableWithSubRows: React.FC<{
               <Button
                 size="icon"
                 variant="outline"
-                title={i18next.t("PlayerPage.AddNewPlayer")}
+                title={t("PlayerPage.AddNewPlayer")}
               >
                 <Plus />
               </Button>
@@ -320,12 +317,12 @@ const ExampleTableWithSubRows: React.FC<{
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {i18next.t("PlayerPage.Delete", {
+                  {t("PlayerPage.Delete", {
                     count: table.getFilteredSelectedRowModel().rows.length,
                   })}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {i18next.t("PlayerPage.DeleteInfo", {
+                  {t("PlayerPage.DeleteInfo", {
                     name:
                       table.getFilteredSelectedRowModel().rows.length === 1
                         ? table.getFilteredSelectedRowModel().rows[0].original
@@ -338,13 +335,13 @@ const ExampleTableWithSubRows: React.FC<{
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{i18next.t("Cancel")}</AlertDialogCancel>
+                <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
                     //handleDelete();
                   }}
                 >
-                  {i18next.t("Delete")}
+                  {t("Delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -429,7 +426,7 @@ const ExampleTableWithSubRows: React.FC<{
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  {i18next.t("Warning.NoResults")}
+                  {t("Warning.NoResults")}
                 </TableCell>
               </TableRow>
             )}
@@ -446,7 +443,7 @@ const SubTable: React.FC<{
   filter: string;
   rowSelection: RowSelectionState;
   setRowSelection: any;
-}> = ({ season_id, matches, filter, rowSelection, setRowSelection }) => {
+}> = ({ season_id, matches, rowSelection, setRowSelection }) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const columns = React.useMemo<ColumnDef<MatchData>[]>(
@@ -599,7 +596,7 @@ const SubTable: React.FC<{
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                {i18next.t("Warning.NoResults")}
+                {t("Warning.NoResults")}
               </TableCell>
             </TableRow>
           )}

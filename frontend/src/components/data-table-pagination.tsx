@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import i18next from "i18next";
+import { useTranslation } from "react-i18next";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -23,11 +23,13 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex items-center justify-between px-2">
       {table.getFilteredSelectedRowModel().rows !== undefined ? (
         <div className="flex-1 text-sm text-muted-foreground">
-          {i18next.t("Pagination.Selected", {
+          {t("Pagination.Selected", {
             value: table.getFilteredSelectedRowModel().rows.length,
             length: table.getFilteredRowModel().rows.length,
           })}
@@ -35,9 +37,7 @@ export function DataTablePagination<TData>({
       ) : null}
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">
-            {i18next.t("Pagination.RowPerPage")}
-          </p>
+          <p className="text-sm font-medium">{t("Pagination.RowPerPage")}</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
@@ -57,7 +57,7 @@ export function DataTablePagination<TData>({
           </Select>
         </div>
         <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          {i18next.t("Pagination.Page", {
+          {t("Pagination.Page", {
             value: table.getState().pagination.pageIndex + 1,
             length: table.getPageCount() === 0 ? 1 : table.getPageCount(),
           })}

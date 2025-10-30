@@ -20,8 +20,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import React, { useState } from "react";
-
-import i18next from "@/translation/translation";
 import {
   ArrowDown,
   ArrowUp,
@@ -31,8 +29,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-import { PlayerData } from "./columns";
 import { tableNumberFilter } from "@/util";
 import {
   HoverCard,
@@ -53,8 +49,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { API_URL } from "@/constants/constants";
-import { useNavigate } from "react-router-dom";
 import { TableSearchField } from "@/components/table-searchfield";
+import { PlayersStats } from "./Players";
+import { useTranslation } from "react-i18next";
 
 interface DataTableProps<PlayerData, TValue> {
   columns: ColumnDef<PlayerData, TValue>[];
@@ -64,51 +61,43 @@ interface DataTableProps<PlayerData, TValue> {
 export function DataTable<_TData, TValue>({
   columns,
   data,
-}: DataTableProps<PlayerData, TValue>) {
+}: DataTableProps<PlayersStats, TValue>) {
+  const { t } = useTranslation();
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const [filter, setFilter] = useState("");
-
-  const navigate = useNavigate();
 
   const filteredData = React.useMemo(() => {
     if (!filter) return data; // No filter applied
 
     return data.filter((item) => {
       return filter.split(" ").every((f) => {
-        {
-          /*if (f.startsWith("date:")) {
-          return tableDateFilter(f, "ownGoals", "15.Feb.2025");
-        }*/
-        }
         if (f.startsWith("selected")) {
           const selectionValue = f.replace("selected", "").trim().toLowerCase();
-          const isSelected = !!rowSelection?.[item.uuid];
+          const isSelected = !!rowSelection?.[item.player_uuid];
           if (["!", ":!", ":false"].includes(selectionValue))
             return !isSelected;
           return isSelected;
         }
         if (f.startsWith("name:")) {
-          return item.name.includes(f.replace("name:", "").trim());
+          return item.player_name.includes(f.replace("name:", "").trim());
         }
         if (f.startsWith("ownGoals:")) {
-          return tableNumberFilter(f, "onwGoals", item.own_goals, true);
+          return tableNumberFilter(f, "onwGoals", item.own_goals_scored, true);
         }
         if (f.startsWith("goals:")) {
-          return tableNumberFilter(f, "goals", item.goals, true);
+          return tableNumberFilter(f, "goals", item.goals_scored, true);
         }
         if (f.startsWith("games:")) {
-          return tableNumberFilter(f, "games", item.attended_games, true);
+          return tableNumberFilter(f, "games", item.matches_played, true);
         }
-
+        if (f.startsWith("gamescored:")) {
+          return tableNumberFilter(f, "games", item.matches_played, true);
+        }
         {
-          const searchableFields: (keyof PlayerData)[] = [
-            "name",
-            "goals",
-            "own_goals",
-            "attended_games",
-          ];
+          const searchableFields: (keyof PlayersStats)[] = ["player_name"];
           if (
             searchableFields.some((key) =>
               String(item[key]).toLowerCase().includes(f.toLowerCase())
@@ -120,6 +109,7 @@ export function DataTable<_TData, TValue>({
       });
     });
   }, [filter, data, rowSelection]);
+
   const table = useReactTable({
     data: filteredData || [],
     columns,
@@ -127,7 +117,7 @@ export function DataTable<_TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onRowSelectionChange: setRowSelection,
-    getRowId: (row) => row.uuid,
+    getRowId: (row) => row.player_uuid,
 
     onSortingChange: setSorting,
     enableSortingRemoval: true,
@@ -138,15 +128,16 @@ export function DataTable<_TData, TValue>({
       rowSelection,
     },
   });
+
   async function handleDelete() {
     if (table.getFilteredSelectedRowModel().rows.length > 0) {
       try {
-        const response = await fetch(`${API_URL}/deleteplayers`, {
+        const response = await fetch(`${API_URL}/players/`, {
           method: "DELETE",
           body: JSON.stringify({
-            data: table
+            player_ids: table
               .getFilteredSelectedRowModel()
-              .rows.map((r) => r.original),
+              .rows.map((r) => r.original.id),
           }),
           headers: {
             "Content-Type": "application/json",
@@ -162,7 +153,6 @@ export function DataTable<_TData, TValue>({
       } catch (error) {
         console.error("Request failed:", error);
       }
-      navigate("/players");
     } else {
       console.warn("WARNING: Zero Element Selected");
     }
@@ -204,13 +194,11 @@ export function DataTable<_TData, TValue>({
                   stroke="hsl(var(--muted-foreground))"
                 />
                 <div className="space-y-1 ">
-                  <h4 className="text-sm font-semibold">
-                    {i18next.t("ColumnFilter")}
-                  </h4>
-                  <p className="text-sm">{i18next.t("ColumnFilterInfo")}</p>
+                  <h4 className="text-sm font-semibold">{t("ColumnFilter")}</h4>
+                  <p className="text-sm">{t("ColumnFilterInfo")}</p>
                   <div className="border rounded-md p-2 ">
                     <p className="text-sm font-bold text-muted-foreground">
-                      {i18next.t("Examples")}:{" "}
+                      {t("Examples")}:{" "}
                     </p>
                     <div className="text-sm italic text-muted-foreground">
                       <p>name:Alice</p>
@@ -229,7 +217,7 @@ export function DataTable<_TData, TValue>({
               <Button
                 size="icon"
                 variant="outline"
-                title={i18next.t("PlayerPage.AddNewPlayer")}
+                title={t("PlayerPage.AddNewPlayer")}
               >
                 <Plus />
               </Button>
@@ -250,16 +238,16 @@ export function DataTable<_TData, TValue>({
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {i18next.t("PlayerPage.Delete", {
+                  {t("PlayerPage.Delete", {
                     count: table.getFilteredSelectedRowModel().rows.length,
                   })}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {i18next.t("PlayerPage.DeleteInfo", {
+                  {t("PlayerPage.DeleteInfo", {
                     name:
                       table.getFilteredSelectedRowModel().rows.length === 1
                         ? table.getFilteredSelectedRowModel().rows[0].original
-                            .name
+                            .player_name
                         : "",
                     count: Number(
                       table.getFilteredSelectedRowModel().rows.length
@@ -268,13 +256,13 @@ export function DataTable<_TData, TValue>({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{i18next.t("Cancel")}</AlertDialogCancel>
+                <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
                     handleDelete();
                   }}
                 >
-                  {i18next.t("Delete")}
+                  {t("Delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -372,7 +360,7 @@ export function DataTable<_TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  {i18next.t("Warning.NoResults")}
+                  {t("Warning.NoResults")}
                 </TableCell>
               </TableRow>
             )}

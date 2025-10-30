@@ -10,13 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import i18next from "@/translation/translation";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import CountUp from "react-countup";
-import { dateFormat } from "@/util";
-import { MatchNavBar, MenuBar } from "@/components/navigation-bars";
+import { AnimatedStat, dateFormat } from "@/util";
+import {
+  MatchNavBar,
+  MenuBar,
+  SimplifiedPlayerParams,
+} from "@/components/navigation-bars";
 import { CalendarFold, CircleX } from "lucide-react";
 import {
   Table,
@@ -26,44 +28,65 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { MatchData } from "../matches/columns";
+import { useTranslation } from "react-i18next";
 
-type MatchParams = {
-  match_uuid: string;
-  match_date: string;
-  match_id: number;
-  season_id: number;
-  team1_score: number;
-  team2_score: number;
-};
 export type PlayerParams = {
-  goals_scored: number;
-  match_id: number;
-  own_goals_scored: number;
-  player_id: number;
-  player_match_id: number;
-  player_uuid: string;
-  player_name: string;
-  team_id: number;
-};
-export type SeasonParams = {
-  season_year: number;
   id: number;
-}[];
+  player: { id: number; player_uuid: string; player_name: string };
+  team_id: number;
+  goals_scored: number;
+  own_goals_scored: number;
+};
+
+export type SeasonParams = {
+  id: number;
+  season_year: number;
+};
 
 function Match() {
-  const { match_uuid } = useParams<keyof MatchParams>();
+  const { t } = useTranslation();
+
+  const { match_uuid } = useParams<keyof MatchData>();
   const [match, setMatch] = useState<{
-    match: MatchParams;
+    match: MatchData;
     players: PlayerParams[];
-  } | null>(null);
-  const [seasons, setSeasons] = useState<SeasonParams | null>(null);
+  }>();
+  const [, setSeasons] = useState<SeasonParams[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const team1Players = match
-    ? match?.players.filter((player) => player.team_id == 1)
+  const team1Players: SimplifiedPlayerParams[] = match?.players
+    ? match.players
+        .filter((player) => player.team_id === match.match.team1.id)
+        .map((p) => ({
+          player_uuid: p.player.player_uuid ?? "",
+          player_id: p.player.id,
+          goals_scored: p.goals_scored ?? 0,
+          own_goals_scored: p.own_goals_scored ?? 0,
+        }))
     : [];
-  const team2Players = match
-    ? match?.players.filter((player) => player.team_id == 2)
+  function getTeam1Player(index: number) {
+    const player = match?.players.find(
+      (p) => p.player.player_uuid === team1Players[index]?.player_uuid
+    );
+    return player;
+  }
+  function getTeam2Player(index: number) {
+    const player = match?.players.find(
+      (p) => p.player.player_uuid === team2Players[index]?.player_uuid
+    );
+    return player;
+  }
+
+  const team2Players: SimplifiedPlayerParams[] = match?.players
+    ? match.players
+        .filter((player) => player.team_id === match.match.team2.id)
+        .map((p) => ({
+          player_uuid: p.player.player_uuid ?? "",
+          player_id: p.player.id,
+          goals_scored: p.goals_scored ?? 0,
+          own_goals_scored: p.own_goals_scored ?? 0,
+        }))
     : [];
 
   const maxRows = Math.max(team1Players.length, team2Players.length);
@@ -72,8 +95,8 @@ function Match() {
     try {
       setLoading(true);
       const [matchResponse, seasonResponse] = await Promise.all([
-        fetch(`${API_URL}/match/` + match_uuid),
-        fetch(`${API_URL}/seasons`),
+        fetch(`${API_URL}/matches/` + match_uuid),
+        fetch(`${API_URL}/seasons/`),
       ]);
       if (!matchResponse.ok || !seasonResponse.ok) {
         throw new Error("Failed to fetch data");
@@ -98,6 +121,7 @@ function Match() {
   useEffect(() => {
     fetchData();
   }, [match_uuid]);
+  console.log(match);
 
   return (
     <>
@@ -110,16 +134,20 @@ function Match() {
           <MenuBar />
 
           <MatchNavBar
-            match_id={match?.match.match_id ? match.match.match_id : -1}
+            match_id={match?.match?.id ? match.match.id : -1}
             match_uuid={match_uuid ? match_uuid : ""}
             match_date={
-              match?.match && new Date(match.match.match_date)
+              match?.match?.match_date && new Date(match.match.match_date)
                 ? new Date(match.match.match_date)
                 : undefined
             }
             team_1Players={team1Players}
             team_2Players={team2Players}
-            match_season_id={match ? match?.match.season_id : -1}
+            team1={match?.match?.team1}
+            team2={match?.match?.team2}
+            match_season_id={
+              match?.match?.season?.id ? match.match.season.id : -1
+            }
             fetchFn={fetchData}
           />
 
@@ -145,19 +173,17 @@ function Match() {
                         : match_uuid}
                     </CardTitle>
                     <CardDescription>
-                      {match?.match.match_date ? (
+                      {match?.match?.match_date ? (
                         <>
-                          {i18next.t("Saison")}{" "}
-                          {seasons
-                            ? seasons?.find(
-                                (s) => s.id === match.match.season_id
-                              )?.season_year
+                          {t("Saison")}{" "}
+                          {match?.match?.season.season_year
+                            ? match?.match?.season.season_year
                             : "Season for id '" +
-                              match.match.season_id +
+                              match.match.season.id +
                               "' not found!"}
                         </>
                       ) : (
-                        i18next.t("Error.MatchNotFound")
+                        t("Error.MatchNotFound")
                       )}
                     </CardDescription>
                   </div>
@@ -167,64 +193,32 @@ function Match() {
               <div className="flex divide-x border-t sm:border-t-0 justify-items-stretch">
                 <div className="flex basis-1/2 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:border-l sm:px-8 sm:py-6">
                   <span className="text-xs text-muted-foreground">
-                    {i18next.t("Match Result")}
+                    {t("Match Result")}
                   </span>
                   <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                    {match?.match.team1_score ? (
-                      <CountUp
-                        start={0}
-                        end={match?.match.team1_score}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                      />
-                    ) : (
-                      "0"
-                    )}
-                    <span className="text-muted-foreground text-sm sm:text-2xl">
+                    <AnimatedStat value={match?.match?.team1_score ?? 0} />
+                    <span className="text-muted-foreground text-sm sm:text-3xl">
                       {" : "}
                     </span>
-                    {match?.match.team2_score ? (
-                      <CountUp
-                        start={0}
-                        end={match?.match.team2_score}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                      />
-                    ) : (
-                      "0"
-                    )}
+                    <AnimatedStat value={match?.match?.team2_score ?? 0} />
                   </div>
                 </div>
 
                 <div className="flex basis-1/2 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:border-l sm:px-8 sm:py-6">
                   <span className="text-xs text-muted-foreground">
-                    {i18next.t("NumberOfPlayers")}
+                    {t("NumberOfPlayers")}
                   </span>
                   <div className="text-lg font-bold leading-none sm:text-3xl tabular-nums">
                     {team1Players?.length ? (
-                      <CountUp
-                        start={0}
-                        end={team1Players?.length}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                      />
+                      <AnimatedStat value={team1Players?.length ?? 0} />
                     ) : (
                       "-"
                     )}
-                    <span className="text-muted-foreground text-sm sm:text-2xl">
+                    <span className="text-muted-foreground text-sm sm:text-3xl">
                       {" vs. "}
                     </span>
                     {team2Players?.length ? (
-                      <CountUp
-                        start={0}
-                        end={team2Players?.length}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                      />
+                      <AnimatedStat value={team2Players?.length ?? 0} />
                     ) : (
                       "-"
                     )}
@@ -234,72 +228,6 @@ function Match() {
             </CardHeader>
 
             <CardContent className="pt-2">
-              {/*              <Card className="px-2">
-                <div className="grid grid-cols-2 sm:grid-cols-4 sm:divide-x items-end my-2">
-                  <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-r border-b sm:border-r-0 sm:border-b-0">
-                    <span className="text-xs text-muted-foreground">
-                      {i18next.t("Attended Games")}
-                    </span>
-                    <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={0}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                        preserveValue
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-b sm:border-b-0">
-                    <span className="text-xs text-muted-foreground">
-                      {i18next.t("Wins")}
-                    </span>
-                    <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={0}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                        preserveValue
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-r sm:border-r-0">
-                    <span className="text-xs text-muted-foreground">
-                      {i18next.t("Draws")}
-                    </span>
-                    <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={0}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                        preserveValue
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6">
-                    <span className="text-xs text-muted-foreground">
-                      {i18next.t("Losses")}
-                    </span>
-                    <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={0}
-                        duration={1.5}
-                        delay={0.2}
-                        separator={thousandsSeparator}
-                        useEasing
-                        preserveValue
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="grid justify-items-start border-t p-1">
-                  <span className="text-sm font-bold">
-                    {i18next.t("Match Results")}
-                  </span>
-                </div>
-              </Card>*/}
               <div className="border rounded-xl mt-2 overflow-hidden">
                 <Table>
                   <TableHeader>
@@ -315,13 +243,14 @@ function Match() {
                         <TableRow key={index}>
                           {/* Team 1 Column */}
                           <TableCell className="text-right">
-                            {team1Players[index] ? (
+                            {team1Players[index].player_id &&
+                            getTeam2Player(index) ? (
                               <div className="grid grid-cols-6 items-center gap-2">
                                 <Link
                                   to={`/player/${team1Players[index].player_uuid}`}
                                   className="col-span-4 text-muted-foreground hover:underline text-right"
                                 >
-                                  {team1Players[index].player_name}
+                                  {getTeam2Player(index)?.player.player_name}
                                 </Link>
                                 <span className="col-span-1 text-right">
                                   {team1Players[index].own_goals_scored > 0 && (
@@ -344,7 +273,7 @@ function Match() {
 
                           {/* Team 2 Column */}
                           <TableCell className="text-left">
-                            {team2Players[index] ? (
+                            {team2Players[index] && getTeam1Player(index) ? (
                               <div className="grid grid-cols-6 items-center gap-2">
                                 <span className="col-span-1 text-left">
                                   {team2Players[index].goals_scored}
@@ -360,7 +289,7 @@ function Match() {
                                   to={`/player/${team2Players[index].player_uuid}`}
                                   className="col-span-4 text-muted-foreground hover:underline text-left"
                                 >
-                                  {team2Players[index].player_name}
+                                  {getTeam1Player(index)?.player.player_name}
                                 </Link>
                               </div>
                             ) : (
@@ -372,7 +301,7 @@ function Match() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={3} className="text-center h-24">
-                          {i18next.t("Warning.NoResults")}
+                          {t("Warning.NoResults")}
                         </TableCell>
                       </TableRow>
                     )}

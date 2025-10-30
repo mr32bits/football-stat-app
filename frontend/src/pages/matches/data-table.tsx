@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table";
 import React, { useState } from "react";
 
-import i18next from "@/translation/translation";
 import {
   ArrowDown,
   ArrowUp,
@@ -54,18 +53,22 @@ import {
 import { API_URL } from "@/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { TableSearchField } from "@/components/table-searchfield";
-import { MatchWithSeason } from "./columns";
+import { MatchData } from "./columns";
+import { useTranslation } from "react-i18next";
 
-interface DataTableProps<MatchWithSeason, TValue> {
-  columns: ColumnDef<MatchWithSeason, TValue>[];
-  data: MatchWithSeason[];
+interface DataTableProps<MatchData, TValue> {
+  columns: ColumnDef<MatchData, TValue>[];
+  data: MatchData[];
 }
-
 export function DataTable<_TData, TValue>({
   columns,
   data,
-}: DataTableProps<MatchWithSeason, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+}: DataTableProps<MatchData, TValue>) {
+  const { t } = useTranslation();
+
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "match_date", desc: true },
+  ]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const [filter, setFilter] = useState("");
@@ -95,7 +98,13 @@ export function DataTable<_TData, TValue>({
             return tableDateFilter(f, "date", item.match_date);
           }
           if (f.startsWith("season:")) {
-            return tableNumberFilter(f, "season", item.season_year, true, true);
+            return tableNumberFilter(
+              f,
+              "season",
+              item.season.season_year,
+              true,
+              true
+            );
           }
           if (f.startsWith("team1:")) {
             return tableNumberFilter(f, "team1", item.team1_score, true, true);
@@ -105,7 +114,7 @@ export function DataTable<_TData, TValue>({
           }
 
           {
-            const searchableFields: (keyof MatchWithSeason)[] = [];
+            const searchableFields: (keyof MatchData)[] = [];
             if (
               searchableFields.some((key) =>
                 String(item[key]).toLowerCase().includes(f.toLowerCase())
@@ -140,17 +149,23 @@ export function DataTable<_TData, TValue>({
   async function handleDelete() {
     if (table.getFilteredSelectedRowModel().rows.length > 0) {
       try {
-        const response = await fetch(`${API_URL}/deletematches`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            data: table
+        const response = await fetch(
+          `${API_URL}/matches/` +
+            table
               .getFilteredSelectedRowModel()
-              .rows.map((r) => r.original),
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+              .rows.map((r) => r.original.match_uuid),
+          {
+            method: "DELETE",
+            body: JSON.stringify({
+              data: table
+                .getFilteredSelectedRowModel()
+                .rows.map((r) => r.original),
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error(
             `Server error: ${response.status} ${response.statusText}`
@@ -203,13 +218,11 @@ export function DataTable<_TData, TValue>({
                   stroke="hsl(var(--muted-foreground))"
                 />
                 <div className="space-y-1 ">
-                  <h4 className="text-sm font-semibold">
-                    {i18next.t("ColumnFilter")}
-                  </h4>
-                  <p className="text-sm">{i18next.t("ColumnFilterInfo")}</p>
+                  <h4 className="text-sm font-semibold">{t("ColumnFilter")}</h4>
+                  <p className="text-sm">{t("ColumnFilterInfo")}</p>
                   <div className="border rounded-md p-2 ">
                     <p className="text-sm font-bold text-muted-foreground">
-                      {i18next.t("Examples")}:{" "}
+                      {t("Examples")}:{" "}
                     </p>
                     <div className="text-sm italic text-muted-foreground">
                       <p>date:(before:|after:)15.08.2024</p>
@@ -229,7 +242,7 @@ export function DataTable<_TData, TValue>({
               <Button
                 size="icon"
                 variant="outline"
-                title={i18next.t("PlayerPage.AddNewPlayer")}
+                title={t("PlayerPage.AddNewPlayer")}
               >
                 <Plus />
               </Button>
@@ -250,12 +263,12 @@ export function DataTable<_TData, TValue>({
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {i18next.t("PlayerPage.Delete", {
+                  {t("PlayerPage.Delete", {
                     count: table.getFilteredSelectedRowModel().rows.length,
                   })}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {i18next.t("PlayerPage.DeleteInfo", {
+                  {t("PlayerPage.DeleteInfo", {
                     name:
                       table.getFilteredSelectedRowModel().rows.length === 1
                         ? table.getFilteredSelectedRowModel().rows[0].original
@@ -268,13 +281,13 @@ export function DataTable<_TData, TValue>({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{i18next.t("Cancel")}</AlertDialogCancel>
+                <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
                     handleDelete();
                   }}
                 >
-                  {i18next.t("Delete")}
+                  {t("Delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -372,7 +385,7 @@ export function DataTable<_TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  {i18next.t("Warning.NoResults")}
+                  {t("Warning.NoResults")}
                 </TableCell>
               </TableRow>
             )}

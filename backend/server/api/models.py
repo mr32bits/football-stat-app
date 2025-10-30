@@ -37,7 +37,7 @@ class Match(models.Model):
         unique_together = ('season', 'match_date', 'team1', 'team2')
 
     def __str__(self):
-        return f"{self.match_date.date().strftime('%d.%m.%Y')} ({self.season}) - {self.team1} vs {self.team2}"
+        return f"{self.match_date.strftime('%d.%m.%Y')} ({self.season}) - {self.team1} vs {self.team2}"
 
 
 class PlayerMatch(models.Model):
@@ -51,4 +51,4 @@ class PlayerMatch(models.Model):
         unique_together = ('player', 'match')
 
     def __str__(self):
-        return f"{self.player} - {self.match}"
+        return f"{self.player} - {self.match} - {self.team}"

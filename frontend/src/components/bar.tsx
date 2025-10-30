@@ -1,4 +1,3 @@
-import { useSeason } from "@/components/season-context";
 import { useEffect, useState } from "react";
 import {
   Tooltip,
@@ -6,71 +5,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import i18next from "i18next";
+import { useTranslation } from "react-i18next";
 
-const testData = [
-  { id: 1, wins: 3, draws: 22, losses: 13 },
-  { id: 2, wins: 14, draws: 23, losses: 3 },
-];
-/*const chartConfig = {};
-
-export default function StackedBarChart({
-  data,
-}: {
-  data: {
-    id: number;
-    name: string;
-    wins: number;
-    draws: number;
-    losses: number;
-  }[];
-}) {
-  const { season } = useSeason();
-  const selectedSeasonData = testData.find((s) => s.id === season?.id) || null;
-  return (
-    <Card className="p-4">
-      <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="max-h-[50px] w-full rounded-lg"
-        >
-          <BarChart
-            data={selectedSeasonData ? [selectedSeasonData] : []}
-            layout="vertical"
-          >
-            <XAxis type="number" hide />
-            <YAxis dataKey="name" type="category" hide />
-            <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-            <Bar
-              dataKey="wins"
-              stackId="1"
-              fill="#00c951"
-              name="Wins"
-              radius={[10, 10, 10, 10]}
-            />
-            <Bar
-              dataKey="draws"
-              stackId="1"
-              fill="#6a7282"
-              name="Draws"
-              radius={[10, 10, 10, 10]}
-            />
-            <Bar
-              className="fill-red-500"
-              dataKey="losses"
-              stackId="1"
-              fill="#EF4444"
-              name="Losses"
-              radius={[10, 10, 10, 10]}
-            />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}*/
-
-function StackedBarChartBar({
+export function StackedBarChartBar({
   seasonData,
 }: {
   seasonData: {
@@ -78,15 +15,11 @@ function StackedBarChartBar({
     wins: number;
     draws: number;
     losses: number;
-  }[];
-}) {
-  const { season } = useSeason();
-
-  const data = seasonData.find((s) => s.id === season?.id) || {
-    wins: 0,
-    draws: 0,
-    losses: 0,
   };
+}) {
+  const { t } = useTranslation("translation");
+
+  const data = seasonData;
   const total = data.wins + data.draws + data.losses;
   const [animatedWins, setAnimatedWins] = useState(0);
   const [animatedDraws, setAnimatedDraws] = useState(0);
@@ -113,7 +46,7 @@ function StackedBarChartBar({
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            {i18next.t("Wins")}: {data.wins} ({animatedWins.toFixed(2)}%)
+            {t("Wins")}: {data.wins} ({animatedWins.toFixed(2)}%)
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -127,7 +60,7 @@ function StackedBarChartBar({
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            {i18next.t("Draws")}: {data.draws} ({animatedDraws.toFixed(2)}%)
+            {t("Draws")}: {data.draws} ({animatedDraws.toFixed(2)}%)
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -140,7 +73,7 @@ function StackedBarChartBar({
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            {i18next.t("Losses")}: {data.losses} ({animatedLosses.toFixed(2)}%)
+            {t("Losses")}: {data.losses} ({animatedLosses.toFixed(2)}%)
           </TooltipContent>
         </Tooltip>
       </div>

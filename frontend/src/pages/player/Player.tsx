@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { API_URL } from "../../constants/constants";
 import {
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import i18next from "@/translation/translation";
 import {
   Select,
   SelectContent,
@@ -22,99 +21,93 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { useSeason } from "@/components/season-context";
 import StackedBarChart from "@/components/bar";
-import CountUp from "react-countup";
-import { DecimalCountUp, decimalSeparator, thousandsSeparator } from "@/util";
+import { AnimatedStat, DecimalCountUp } from "@/util";
 import { MenuBar, PlayerNavBar } from "@/components/navigation-bars";
 import { GoalsChart } from "./charts";
 import { Separator } from "@/components/ui/separator";
 import { CircleX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-type PlayerParams = {
-  uuid: string;
-  name: string;
-  attended_games: number;
-  games_scored: number;
-  goals: number;
-  own_goals: number;
-  wins: number;
-  draws: number;
-  losses: number;
-};
-
-type SeasonParams = {
-  year: number;
-  id: number;
+type PlayerSeasonParams = {
+  selected_season: number;
+  stats: {
+    matches_played: number;
+    matches_scored: number;
+    goals_scored: number;
+    own_goals_scored: number;
+    wins: number;
+    losses: number;
+    draws: number;
+  };
 };
 
-type GoalStats = {
-  [goals: string]: number;
-};
-type SeasonPlayerStatsParams = {
-  id: number;
-  attended_games: number;
-  goals: number;
-  own_goals: number;
-  goals_per_match: any;
-  wins: number;
-  losses: number;
-  draws: number;
-  goal_stats: GoalStats[];
-};
-type SeasonStatsParams = {
-  seasons: SeasonParams[] | null;
-  stats: SeasonPlayerStatsParams[] | null;
-};
+export function Player() {
+  const { t } = useTranslation();
 
-function Player() {
-  const { uuid } = useParams<keyof PlayerParams>();
-  const [player, setPlayer] = useState<PlayerParams>({
-    uuid: uuid ? uuid : "",
-    name: "",
-    attended_games: 0,
-    games_scored: 0,
-    goals: 0,
-    own_goals: 0,
-    wins: 0,
-    draws: 0,
-    losses: 0,
-  });
+  const { uuid } = useParams<string>();
+  const [player, setPlayer] = useState<{
+    id: number;
+    player_name: string;
+    player_uuid: string;
+  }>({ id: -1, player_name: "", player_uuid: uuid ? uuid : "" });
   const { season, setSeason } = useSeason();
-  const handleSeasonChange = (newSeason: { year: number; id: number }) => {
+  const [seasons, setSeasons] = useState<
+    | {
+        id: number;
+        season_year: number;
+      }[]
+    | []
+  >([]);
+  const handleSeasonChange = (
+    newSeason:
+      | {
+          season_year: number;
+          id: number;
+        }
+      | "All"
+  ) => {
     setSeason(newSeason);
   };
-
-  const [stats, setStats] = useState<SeasonStatsParams | null>(null);
-  const [currentStats, setCurrentStats] =
-    useState<SeasonPlayerStatsParams | null>(null);
-
+  const [stats, setStats] = useState<PlayerSeasonParams>({
+    selected_season: -1,
+    stats: {
+      matches_played: 0,
+      matches_scored: 0,
+      goals_scored: 0,
+      own_goals_scored: 0,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+    },
+  });
   const [loading, setLoading] = useState<boolean>(true);
-  const formattedData =
-    stats?.seasons?.map((season, index) => ({
-      id: season.id,
-      wins: stats?.stats?.[index]?.wins || 0,
-      draws: stats?.stats?.[index]?.draws || 0,
-      losses: stats?.stats?.[index]?.losses || 0,
-    })) || [];
+  const formattedData = stats?.selected_season
+    ? {
+        id: stats.selected_season,
+        wins: stats.stats.wins || 0,
+        draws: stats.stats.draws || 0,
+        losses: stats.stats.losses || 0,
+      }
+    : { id: 0, wins: 0, draws: 0, losses: 0 };
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [playerResponse, seasonStatsResponse] = await Promise.all([
-        fetch(`${API_URL}/player/` + uuid),
-        fetch(`${API_URL}/season-stats/` + uuid),
+      const [playerResponse, seasonsResponse] = await Promise.all([
+        fetch(`${API_URL}/players/` + uuid),
+        fetch(`${API_URL}/seasons/`),
       ]);
-      if (!playerResponse.ok || !seasonStatsResponse.ok) {
+      if (!playerResponse.ok || !seasonsResponse.ok) {
         throw new Error("Failed to fetch data");
       }
 
       const playerData = await playerResponse.json();
-      const seasonStatsData: SeasonStatsParams =
-        await seasonStatsResponse.json();
+      const seasonsData = await seasonsResponse.json();
       console.log("PlayerData:", playerData);
-      console.log("SeasonStatsData:", seasonStatsData);
+      console.log("SeasonData:", seasonsData);
 
       setTimeout(() => {
         setPlayer(playerData);
-        setStats(seasonStatsData);
+        setSeasons(seasonsData);
         setLoading(false);
       }, 0);
     } catch (error) {
@@ -126,14 +119,31 @@ function Player() {
     fetchData();
   }, [uuid]);
 
-  useEffect(() => {
-    if (stats && season) {
-      const currStats = stats.stats?.find((s) => s.id === season.id) || null;
-      currStats ? "" : console.error("ERROR: Season not found!");
+  const fetchSeasonStatData = async () => {
+    if (season === null) return;
+    try {
+      let query = "";
+      if (season !== "All") {
+        query = `?season_id=${season.id}`;
+      }
 
-      setCurrentStats(currStats);
+      const playerStatsResponse = await fetch(
+        `${API_URL}/players/${uuid}/stats/${query}`
+      );
+
+      if (!playerStatsResponse.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const playerStatsData = await playerStatsResponse.json();
+      console.log("PlayerStatsData: ", playerStatsData);
+      setStats(playerStatsData);
+    } catch (error) {
+      console.error("API Fetch Error:", error);
     }
-  }, [stats, season]);
+  };
+  useEffect(() => {
+    fetchSeasonStatData();
+  }, [season]);
 
   return (
     <>
@@ -146,7 +156,7 @@ function Player() {
           <MenuBar />
 
           <PlayerNavBar
-            _name={player?.name}
+            _name={player?.player_name}
             uuid={uuid ? uuid : "--"}
             fetchFn={fetchData}
           />
@@ -158,8 +168,8 @@ function Player() {
                   <div className="flex-shrink-0 ">
                     <Avatar className="w-32 h-32 text-lg sm:w-16 sm:h-16">
                       <AvatarFallback className="text-4xl sm:text-xl">
-                        {player?.name ? (
-                          player.name.charAt(0)
+                        {player?.player_name ? (
+                          player.player_name.charAt(0)
                         ) : (
                           <CircleX className="w-24 h-24 sm:w-10 sm:h-10 stroke-red-500" />
                         )}
@@ -167,11 +177,13 @@ function Player() {
                     </Avatar>
                   </div>
                   <div className="flex flex-col items-center text-center sm:items-start sm:text-left sm:ml-4 mt-4 sm:mt-0">
-                    <CardTitle>{player?.name ? player.name : uuid}</CardTitle>
+                    <CardTitle>
+                      {player?.player_name ? player.player_name : uuid}
+                    </CardTitle>
                     <CardDescription>
-                      {player?.name
-                        ? i18next.t("Player")
-                        : i18next.t("Error.PlayerNotFound")}
+                      {player?.player_name
+                        ? t("Player")
+                        : t("Error.PlayerNotFound")}
                     </CardDescription>
                   </div>
                 </div>
@@ -180,34 +192,18 @@ function Player() {
               <div className="flex">
                 <div className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6">
                   <span className="text-xs text-muted-foreground">
-                    {i18next.t("Attended Games")}
+                    {t("Attended Games")}
                   </span>
                   <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                    <CountUp
-                      start={0}
-                      end={player?.attended_games}
-                      duration={1.5}
-                      delay={0.2}
-                      separator={thousandsSeparator}
-                      decimal={decimalSeparator}
-                      useEasing
-                    />
+                    <AnimatedStat value={stats?.stats?.matches_played ?? 0} />
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6">
                   <span className="text-xs text-muted-foreground">
-                    {i18next.t("Goals")}
+                    {t("Goals")}
                   </span>
                   <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                    <CountUp
-                      start={0}
-                      end={player?.goals}
-                      duration={1.5}
-                      delay={0.2}
-                      separator={thousandsSeparator}
-                      decimal={decimalSeparator}
-                      useEasing
-                    />
+                    <AnimatedStat value={stats?.stats?.goals_scored ?? 0} />
                   </div>
                 </div>
               </div>
@@ -217,112 +213,79 @@ function Player() {
                 <div className="grid lg:grid-cols-6 grid-cols-3 lg:divide-x items-end m-2">
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-r border-b lg:border-r-0 lg:border-b-0">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("BROKEN Translation")} - Tor ∅
+                      {t("BROKEN Translation")} - Tor ∅
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={player.goals / player.attended_games}
-                        duration={1.5}
-                        decimal={decimalSeparator}
-                        decimals={2}
-                        delay={0.2}
-                        useEasing
-                        plugin={
-                          new DecimalCountUp({
-                            decimalSeparator: decimalSeparator,
-                          })
+                      <AnimatedStat
+                        value={
+                          stats?.stats?.goals_scored /
+                          stats?.stats?.matches_played
                         }
-                        preserveValue
+                        decimalPlaces={2}
+                        plugin={new DecimalCountUp()}
                       />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-r border-b lg:border-r-0 lg:border-b-0 ">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("BROKEN Translation")} - Netz %
+                      {t("BROKEN Translation")} - Netz %
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={
-                          (player.games_scored * 100) / player.attended_games
+                      <AnimatedStat
+                        value={
+                          (stats?.stats?.matches_scored * 100) /
+                            stats?.stats?.matches_played || 0
                         }
-                        duration={1.5}
-                        decimal={decimalSeparator}
-                        decimals={2}
-                        delay={0.2}
-                        useEasing
+                        decimalPlaces={2}
                         plugin={
                           new DecimalCountUp({
-                            decimalSeparator: decimalSeparator,
                             suffix: "%",
                           })
                         }
-                        preserveValue
                       />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-b lg:border-b-0">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("BROKEN Translation")} - Sieg %
+                      {t("BROKEN Translation")} - Sieg %
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={(player.wins * 100) / player.attended_games}
-                        duration={1.5}
-                        decimal={decimalSeparator}
-                        decimals={2}
-                        delay={0.2}
-                        useEasing
+                      <AnimatedStat
+                        value={
+                          (stats?.stats?.wins * 100) /
+                            stats?.stats?.matches_played || 0
+                        }
+                        decimalPlaces={2}
                         plugin={
                           new DecimalCountUp({
-                            decimalSeparator: decimalSeparator,
                             suffix: "%",
                           })
                         }
-                        preserveValue
                       />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-r lg:border-r-0">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Wins")}
+                      {t("Wins")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={player.wins}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats?.stats?.wins ?? 0} />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6 border-r lg:border-r-0">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Draws")}
+                      {t("Draws")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={player.draws}
-                        duration={1.5}
-                        delay={0.2}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats?.stats?.draws ?? 0} />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Losses")}
+                      {t("Losses")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={player.losses}
-                        duration={1.5}
-                        delay={0.2}
-                        separator={thousandsSeparator}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats?.stats?.losses ?? 0} />
                     </div>
                   </div>
                 </div>
@@ -331,34 +294,43 @@ function Player() {
             <Separator />
             <CardContent className="pt-2">
               <Select
-                value={season?.id.toString() || ""}
+                value={season === "All" ? "-1" : season?.id?.toString() || ""}
                 onValueChange={(value) => {
-                  const selectedSeason =
-                    (stats?.seasons &&
-                      stats?.seasons.find((s) => s.id === parseInt(value))) ||
-                    null;
-                  if (selectedSeason) {
-                    handleSeasonChange({
-                      year: selectedSeason.year,
-                      id: selectedSeason.id,
-                    } as SeasonParams);
+                  if (value == "-1") {
+                    handleSeasonChange("All");
+                  } else {
+                    const selectedSeason =
+                      (seasons &&
+                        seasons.find((s) => s.id === parseInt(value))) ||
+                      null;
+                    if (selectedSeason) {
+                      handleSeasonChange({
+                        season_year: selectedSeason.season_year,
+                        id: selectedSeason.id,
+                      });
+                    }
                   }
                 }}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={i18next.t("Season")} />
+                  <SelectValue placeholder={t("Season")} />
                 </SelectTrigger>
                 <SelectContent className="max-h-[160px]">
-                  {stats?.seasons && stats?.seasons?.length > 0 ? (
-                    stats.seasons.map((season) => (
+                  {seasons && seasons.length > 0 ? (
+                    seasons.map((season) => (
                       <SelectItem key={season.id} value={season.id.toString()}>
-                        {season.year}
+                        {season.season_year}
                       </SelectItem>
                     ))
                   ) : (
                     <SelectItem value="None" disabled>
-                      {i18next.t("Error.NoSeason")}
+                      {t("Error.NoSeason")}
                     </SelectItem>
+                  )}
+                  {seasons ? (
+                    <SelectItem value="-1">{"Alle"}</SelectItem>
+                  ) : (
+                    <></>
                   )}
                 </SelectContent>
               </Select>
@@ -366,75 +338,45 @@ function Player() {
                 <div className="grid grid-cols-4 divide-x items-end">
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Attended Games")}
+                      {t("Attended Games")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={currentStats ? currentStats.attended_games : 0}
-                        duration={1.5}
-                        delay={0.2}
-                        separator={thousandsSeparator}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats.stats.matches_played ?? 0} />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Wins")}
+                      {t("Wins")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={currentStats ? currentStats.wins : 0}
-                        duration={1.5}
-                        delay={0.2}
-                        separator={thousandsSeparator}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats.stats.wins ?? 0} />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Draws")}
+                      {t("Draws")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={currentStats ? currentStats.draws : 0}
-                        duration={1.5}
-                        delay={0.2}
-                        separator={thousandsSeparator}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats.stats.draws ?? 0} />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:px-8 sm:py-6">
                     <span className="text-xs text-muted-foreground">
-                      {i18next.t("Losses")}
+                      {t("Losses")}
                     </span>
                     <div className="w-[80px] sm:w-[120px] text-lg font-bold leading-none sm:text-3xl tabular-nums">
-                      <CountUp
-                        end={currentStats ? currentStats.losses : 0}
-                        duration={1.5}
-                        delay={0.2}
-                        separator={thousandsSeparator}
-                        useEasing
-                        preserveValue
-                      />
+                      <AnimatedStat value={stats.stats.losses ?? 0} />
                     </div>
                   </div>
                 </div>
 
                 <div className="grid justify-items-start border-t p-1">
                   <span className="text-sm font-bold">
-                    {i18next.t("Match Results")}
+                    {t("Match Results")}
                   </span>
                 </div>
                 <StackedBarChart seasonData={formattedData} />
-                <GoalsChart
-                  data={currentStats ? currentStats?.goals_per_match : { 1: 0 }}
-                />
+                <GoalsChart data={{ 1: 0 }} />
               </Card>
             </CardContent>
             <CardFooter className="border-t pt-2">footer</CardFooter>

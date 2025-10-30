@@ -4,10 +4,11 @@ import os
 import sys
 
 spec_root = os.path.abspath('')
-server_path = spec_root + '/server'
-api_path = spec_root + '/api'
+server_path = os.path.join(spec_root, 'server')
+api_path = os.path.join(spec_root, 'api')
 
-print(spec_root)
+print("Building from:", spec_root)
+print("Platform:", sys.platform)
 
 datas = []
 from PyInstaller.utils.hooks import collect_data_files
@@ -32,25 +33,46 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.datas,
-    [],
-    exclude_binaries=True if sys.platform == "darwin" else False,
-    name='server',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
+exe = None
+
+if sys.platform == "darwin":
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name='server',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        console=True,
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+    )
+else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.datas,
+        [],
+        exclude_binaries=False,
+        name='server',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        console=True,
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+    )
 
 coll = COLLECT(
     exe,

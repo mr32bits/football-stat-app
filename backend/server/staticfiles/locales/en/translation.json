@@ -1,0 +1,80 @@
+{
+    "Wins": "Wins",
+    "Draws": "Draws",
+    "Losses": "Losses",
+    "Name": "Name",
+    "Delete": "Delete",
+    "Cancel": "Cancel",
+    "Saving": "Saving...",
+    "SaveChanges": "Save changes",
+    "Goals": "Goals",
+    "Goal_one": "goal",
+    "Goal_other": "goals",
+    "Own Goals": "Own Goals",
+    "Attended Games": "Attended Games",
+    "Search...": "Search...",
+    "Player": "Player",
+    "Players": "Players",
+    "NumberOfPlayers": "Number of Players",
+    "Match Date": "Match Day",
+    "Match": "Match",
+    "Matches": "Matches",
+    "Matches_one": "Match",
+    "Matches_other": "Matches",
+    "Season": "Season",
+    "Match Result": "Match Result",
+    "Match Results": "Match Results",
+    "Examples": "Examples",
+    "ColumnFilter": "Column Filters",
+    "ColumnFilterInfo": "Search for data using column filters.",
+    "MenuBar": {
+        "Players": {
+            "New": "New Player",
+            "Open": "Open Players"
+        },
+        "Matches": {
+            "New": "New Match",
+            "Open": "Open Matches"
+        },
+        "File": {}
+    },
+    "PlayerPage": {
+        "Edit": "Edit player",
+        "EditInfo": "Make changes to the player '{{name}}' here. Click save when you're done.",
+        "Delete_one": "Delete player",
+        "Delete_other": "Delete {{count}} players",
+        "DeleteInfo_zero": "No player was selected.",
+        "DeleteInfo_one": "This action cannot be undone. This will permanently delete player '{{name}}' and remove him from all matches, but will not change the results of the matches.",
+        "DeleteInfo_other": "This action cannot be undone. This will permanently delete the selected players and remove them from all matches, but will not change the results of the matches.",
+        "AddNewPlayer": "Create new player",
+        "AddNewPlayerInfo": "Create a new Player here. Click save when you're done."
+    },
+    "MatchPage": {
+        "Edit": "Edit match",
+        "EditInfo": "Make changes to the match '{{name}}' here. Click save when you're done.",
+        "Delete_one": "Delete match",
+        "Delete_other": "Delete {{count}} matches",
+        "DeleteInfo_zero": "No Match was selected.",
+        "DeleteInfo_one": "This action cannot be undone. This will permanently delete match '{{name}}}'.",
+        "DeleteInfo_other": "This action cannot be undone. This will permanently delete the selected matches.",
+        "AddNewMatch": "Create new match",
+        "AddNewMatchInfo": "Create a new match here. Click save when you're done."
+    },
+    "Pagination": {
+        "Selected": "{{value}} of {{length}} selected Rows",
+        "RowPerPage": "Rows per page:",
+        "Page": "Page {{value}} of {{length}}"
+    },
+    "Error": {
+        "PlayerNotFound": "ERROR: Player Not Found!",
+        "PageNotFound": {
+            "Message": "Oops! Page was not found!",
+            "Back": "Back"
+        },
+        "NoSeason": "ERROR: Seasons Not Found!",
+        "InvalidDate": "Invalid Date"
+    },
+    "Warning": {
+        "NoResults": "No results."
+    }
+}

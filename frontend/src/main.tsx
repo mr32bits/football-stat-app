@@ -1,4 +1,6 @@
 import { StrictMode } from "react";
+import "./i18n";
+
 import App from "@/pages/App";
 import Player from "@/pages/player/Player";
 import Players from "@/pages/players/Players";
@@ -10,7 +12,6 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import "@/index.css";
-import "@/translation/translation";
 import ProfileForm from "@/pages/test/Test.tsx";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SeasonProvider } from "@/components/season-context";

@@ -2,66 +2,62 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Link } from "react-router-dom";
-
-export type PlayerData = {
-  uuid: string;
-  id: number;
-  name: string;
-  goals: number;
-  own_goals: number;
-  attended_games: number;
-};
-
-import i18next from "@/translation/translation";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PlayersStats } from "./Players";
+import { useTranslation } from "react-i18next";
 
-export const columns: ColumnDef<PlayerData>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        className="h-4 w-4 p-0 align-top"
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        className="h-4 w-4 p-0 align-top"
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "name",
-    header: i18next.t("Name"),
-    cell: ({ row }) => (
-      <Link
-        to={`/player/${row.original.uuid}`}
-        className="text-muted-foreground hover:underline"
-      >
-        {row.original.name}
-      </Link>
-    ),
-  },
+export function usePlayerColumns(): ColumnDef<PlayersStats>[] {
+  const { t } = useTranslation();
 
-  {
-    accessorKey: "goals",
-    header: i18next.t("Goals"),
-  },
-  {
-    accessorKey: "own_goals",
-    header: i18next.t("Own Goals"),
-  },
-  {
-    accessorKey: "attended_games",
-    header: i18next.t("Attended Games"),
-  },
-];
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          className="h-4 w-4 p-0 align-top"
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          className="h-4 w-4 p-0 align-top"
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: "player_name",
+      header: t("Name"),
+      cell: ({ row }) => (
+        <Link
+          to={`/player/${row.original.player_uuid}`}
+          className="text-muted-foreground hover:underline"
+        >
+          {row.original.player_name}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "goals_scored",
+      header: t("Goals"),
+      cell: ({ row }) => row.original.goals_scored || 0,
+    },
+    {
+      accessorKey: "own_goals_scored",
+      header: t("Own Goals"),
+      cell: ({ row }) => row.original.own_goals_scored || 0,
+    },
+    {
+      accessorKey: "matches_played",
+      header: t("Attended Games"),
+    },
+  ];
+}

@@ -1,7 +1,9 @@
 export let thousandsSeparator = Number(1000).toLocaleString().charAt(1);
 export let decimalSeparator = Number(1.1).toLocaleString().charAt(1);
 
-import { CountUpPlugin } from "countup.js";
+import { CountUp, CountUpPlugin } from "countup.js";
+import { useEffect, useRef } from "react";
+
 export interface DecimalCountUpOptions {
   decimalSeparator?: string;
   suffix?: string;
@@ -9,7 +11,7 @@ export interface DecimalCountUpOptions {
 export class DecimalCountUp implements CountUpPlugin {
   private options: DecimalCountUpOptions;
   private defaults: DecimalCountUpOptions = {
-    decimalSeparator: ".",
+    decimalSeparator: decimalSeparator,
     suffix: "",
   };
   constructor(options?: DecimalCountUpOptions) {
@@ -27,6 +29,76 @@ export class DecimalCountUp implements CountUpPlugin {
       this.options.decimalSeparator
     }${decimal || "00"}${this.options.suffix}</span></span>`;
   }
+}
+
+type AnimatedStatProps = {
+  value?: number;
+  duration?: number;
+  delay?: number;
+  prefix?: string;
+  suffix?: string;
+  decimalPlaces?: number;
+  separator?: string;
+  decimal?: string;
+  useEasing?: boolean;
+  plugin?: CountUpPlugin;
+};
+
+export const AnimatedStat: React.FC<AnimatedStatProps> = ({
+  value = 0,
+  duration = 1.5,
+  prefix = "",
+  suffix = "",
+  separator = thousandsSeparator,
+  decimal = decimalSeparator,
+  decimalPlaces = 0,
+  useEasing = true,
+  plugin,
+}) => {
+  const spanRef = useRef<HTMLSpanElement | null>(null);
+  const countUpRef = useRef<CountUp | null>(null);
+  const previousValue = useRef<number>(value);
+
+  // Initialize CountUp once (never recreate)
+  useEffect(() => {
+    if (spanRef.current && !countUpRef.current) {
+      countUpRef.current = new CountUp(spanRef.current, value, {
+        duration,
+        prefix,
+        suffix,
+        decimal,
+        separator,
+        decimalPlaces,
+        useEasing,
+        plugin,
+      });
+      countUpRef.current.start();
+      previousValue.current = value;
+    }
+  }, []);
+
+  // Update animation when value changes
+  useEffect(() => {
+    if (!countUpRef.current) return;
+    if (value !== previousValue.current) {
+      countUpRef.current.update(value);
+      previousValue.current = value;
+    }
+  }, [value]);
+
+  return <span ref={spanRef} />;
+};
+
+export function formatDate(date: Date | string): string {
+  var d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
 }
 
 export const locale = new Intl.Locale(navigator.language);

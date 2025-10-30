@@ -9,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import i18next from "i18next";
 import { Input } from "./ui/input";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -34,16 +33,20 @@ import {
   SelectValue,
 } from "./ui/select";
 import { SeasonParams } from "@/pages/match/Match";
+import { formatDate } from "@/util";
+import { useTranslation } from "react-i18next";
 
 export function AddPlayerDialog({ trigger }: { trigger: JSX.Element }) {
+  const { t } = useTranslation();
+
   const formSchema = z.object({
-    name: z.string().min(2).max(50).trim(),
+    player_name: z.string().min(2).max(50).trim(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      player_name: "",
     },
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,16 +57,20 @@ export function AddPlayerDialog({ trigger }: { trigger: JSX.Element }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
-      const response = await fetch(API_URL + "/createplayer", {
+      const response = await fetch(API_URL + "/players/create/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
-      const data = await response.json();
+      const data = await response;
       form.reset();
-      setResponseType(data.success ? "success" : "error");
-      setResponseMessage(data.success || "Error submitting form");
+      setResponseType(data.status == 201 ? "success" : "error");
+      setResponseMessage(
+        data.status == 201
+          ? "Successfully Added Player"
+          : "Error submitting form"
+      );
     } catch (error) {
       setResponseType("error");
       setResponseMessage("Failed to connect to server.");
@@ -91,9 +98,9 @@ export function AddPlayerDialog({ trigger }: { trigger: JSX.Element }) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-lg">
         <DialogHeader>
-          <DialogTitle>{i18next.t("PlayerPage.AddNewPlayer")}</DialogTitle>
+          <DialogTitle>{t("PlayerPage.AddNewPlayer")}</DialogTitle>
           <DialogDescription>
-            {i18next.t("PlayerPage.AddNewPlayerInfo")}
+            {t("PlayerPage.AddNewPlayerInfo")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -103,15 +110,15 @@ export function AddPlayerDialog({ trigger }: { trigger: JSX.Element }) {
           >
             <FormField
               control={form.control}
-              name="name"
+              name="player_name"
               render={({ field }) => (
                 <div>
                   <FormItem className="grid grid-cols-4 gap-4 items-baseline">
-                    <FormLabel>{i18next.t("Name")}</FormLabel>
+                    <FormLabel>{t("Name")}</FormLabel>
                     <FormControl>
                       <Input
                         autoComplete="off"
-                        placeholder={i18next.t("Name") + "..."}
+                        placeholder={t("Name") + "..."}
                         className="col-span-3"
                         {...field}
                       />
@@ -131,7 +138,7 @@ export function AddPlayerDialog({ trigger }: { trigger: JSX.Element }) {
             )}
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? i18next.t("Saving") : i18next.t("SaveChanges")}
+                {isSubmitting ? t("Saving") : t("SaveChanges")}
               </Button>
             </DialogFooter>
           </form>
@@ -142,27 +149,34 @@ export function AddPlayerDialog({ trigger }: { trigger: JSX.Element }) {
 }
 
 export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
-  const formSchema = z.object({
-    date: z.date({
-      required_error: "Please select a date and time",
-      invalid_type_error: i18next.t("Error.InvalidDate"),
-    }),
-    season: z.number().int().nonnegative(),
-  });
+  const { t } = useTranslation();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      date: new Date(),
-      season: -1,
-    },
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const [responseType, setResponseType] = useState("");
   const navigate = useNavigate();
 
-  const [seasons, setSeasons] = useState<SeasonParams | null>(null);
+  const [seasons, setSeasons] = useState<SeasonParams[] | null>(null);
+
+  const formSchema = z.object({
+    match_date: z.date({
+      required_error: "Please select a date and time",
+      invalid_type_error: t("Error.InvalidDate"),
+    }),
+    season_id: z.number().int().nonnegative(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      match_date: new Date(),
+      season_id: seasons
+        ? seasons.reduce((prev, curr) =>
+            prev && prev.season_year > curr.season_year ? prev : curr
+          ).id
+        : -1,
+    },
+  });
 
   const fetchData = async () => {
     try {
@@ -171,10 +185,18 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
         throw new Error("Failed to fetch data");
       }
 
-      const seasons = await seasonResponse.json();
+      const seasons: SeasonParams[] = await seasonResponse.json();
       console.log("SeasonData:", seasons);
 
       setSeasons(seasons);
+      form.setValue(
+        "season_id",
+        seasons
+          ? seasons.reduce((prev, curr) =>
+              prev && prev.season_year > curr.season_year ? prev : curr
+            ).id
+          : -1
+      );
     } catch (error) {
       console.error("API Fetch Error:", error);
     }
@@ -183,16 +205,32 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
-      const response = await fetch(API_URL + "/match/create/", {
+
+      const response = await fetch(API_URL + "/matches/create/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          match_date: formatDate(values.match_date),
+          team1_id: 1,
+          team2_id: 2,
+          season_id: values.season_id,
+        }),
       });
 
-      const data = await response.json();
-      form.reset();
-      setResponseType(data.success ? "success" : "error");
-      setResponseMessage(data.success || "Error submitting form");
+      const resp = await response;
+      form.reset({
+        season_id: seasons
+          ? seasons.reduce((prev, curr) =>
+              prev && prev.season_year > curr.season_year ? prev : curr
+            ).id
+          : -1,
+      });
+      setResponseType(resp.status == 201 ? "success" : "error");
+      setResponseMessage(
+        resp.status == 201
+          ? "Successfully Added Match"
+          : "Error submitting form"
+      );
     } catch (error) {
       setResponseType("error");
       setResponseMessage("Failed to connect to server.");
@@ -205,7 +243,13 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
   //const handleOpen = () => setOpen(true);
   const handleClose = (isOpen: boolean) => {
     if (!isOpen) {
-      form.reset();
+      form.reset({
+        season_id: seasons
+          ? seasons.reduce((prev, curr) =>
+              prev && prev.season_year > curr.season_year ? prev : curr
+            ).id
+          : -1,
+      });
       if (responseMessage === "Player successfully created")
         navigate("/matches");
       setResponseMessage("");
@@ -222,9 +266,9 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-lg">
         <DialogHeader>
-          <DialogTitle>{i18next.t("MatchPage.AddNewMatch")}</DialogTitle>
+          <DialogTitle>{t("MatchPage.AddNewMatch")}</DialogTitle>
           <DialogDescription>
-            {i18next.t("MatchPage.AddNewMatchInfo")}
+            {t("MatchPage.AddNewMatchInfo")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -234,11 +278,11 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
           >
             <FormField
               control={form.control}
-              name="date"
+              name="match_date"
               render={({ field }) => (
                 <div>
                   <FormItem className="grid grid-cols-4 gap-4 items-baseline">
-                    <FormLabel>{i18next.t("Match Date")}</FormLabel>
+                    <FormLabel>{t("Match Date")}</FormLabel>
                     <FormControl>
                       <DatePicker
                         date={field.value}
@@ -252,11 +296,11 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
             />
             <FormField
               control={form.control}
-              name="season"
+              name="season_id"
               render={({ field }) => (
                 <div>
                   <FormItem className="grid grid-cols-4 gap-4 items-baseline">
-                    <FormLabel>{i18next.t("Season")}</FormLabel>
+                    <FormLabel>{t("Season")}</FormLabel>
                     <FormControl>
                       <Select
                         value={field.value.toString()}
@@ -271,21 +315,23 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
                         }}
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder={i18next.t("Season")} />
+                          <SelectValue placeholder={t("Season")} />
                         </SelectTrigger>
                         <SelectContent className="max-h-[160px]">
                           {seasons && seasons?.length > 0 ? (
-                            seasons.map((season) => (
-                              <SelectItem
-                                key={season.id}
-                                value={season.id.toString()}
-                              >
-                                {season.season_year}
-                              </SelectItem>
-                            ))
+                            seasons
+                              .sort((a, b) => b.season_year - a.season_year)
+                              .map((season) => (
+                                <SelectItem
+                                  key={season.id}
+                                  value={season.id.toString()}
+                                >
+                                  {season.season_year}
+                                </SelectItem>
+                              ))
                           ) : (
                             <SelectItem value="None" disabled>
-                              {i18next.t("Error.NoSeason")}
+                              {t("Error.NoSeason")}
                             </SelectItem>
                           )}
                         </SelectContent>
@@ -306,7 +352,7 @@ export function AddMatchDialog({ trigger }: { trigger: JSX.Element }) {
             )}
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? i18next.t("Saving") : i18next.t("SaveChanges")}
+                {isSubmitting ? t("Saving") : t("SaveChanges")}
               </Button>
             </DialogFooter>
           </form>
