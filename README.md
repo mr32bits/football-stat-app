@@ -46,3 +46,4 @@ Move from gui: `.js` & `.css` to the `/static`-folder.<br> And move from gui: `i
 ## TODO
 
 - [ ] Player: Change the Players Goal Stats `{0: 2, 1: 3}`
+- [ ] FIX build-exe.yaml Compression

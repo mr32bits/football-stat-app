@@ -40,4 +40,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: win
-          path: build.zip
+          path: backend/server/dist/server.exe
