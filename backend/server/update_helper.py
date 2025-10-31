@@ -7,6 +7,9 @@ import subprocess
 import ctypes
 
 def main():
+    print("Arguments received:", sys.argv)
+    input("Press Enter to continue...")
+
     if len(sys.argv) < 3:
         print("Usage: updater.exe <target_exe_path> <temp_update_dir>")
         sys.exit(1)

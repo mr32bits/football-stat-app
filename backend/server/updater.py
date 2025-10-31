@@ -164,8 +164,10 @@ def perform_update(new_version: Version, r: requests.Response):
             subprocess.run([
                 "powershell",
                 "-Command",
-                f"Start-Process -FilePath '{helper_path}' "
-                f"-ArgumentList '{app_dir}', '{temp_dir}' -Verb RunAs"
+                (
+                    f'Start-Process -FilePath "{helper_path}" '
+                    f'-ArgumentList \'"{app_dir}" "{temp_dir}"\' -Verb RunAs'
+                )
             ])
 
             messagebox.showinfo(
