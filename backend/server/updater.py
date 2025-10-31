@@ -144,19 +144,35 @@ def perform_update(new_version: Version, r: requests.Response):
         # --- Windows: Replace extracted files in place ---
         elif sys.platform == "win32":
             exe_path = Path(sys.argv[0]).resolve()
-            current_dir = exe_path.parent
+            app_dir = exe_path.parent
+            new_exe = None
 
-            # Prevent updating if the app is run from root or restricted directories
-            if current_dir == Path("C:\\") or not os.access(current_dir, os.W_OK):
-                fallback_dir = Path.home() / "Downloads" / f"FootballStat_{new_version}"
-                fallback_dir.mkdir(parents=True, exist_ok=True)
-                shutil.copytree(temp_dir, fallback_dir, dirs_exist_ok=True)
-                messagebox.showinfo(
-                    "Manual Update Required",
-                    f"The new version has been downloaded to:\n\n{fallback_dir}\n\n"
-                    "Please move it manually to your preferred install folder."
-                )
-                return
+            # Find the new exe inside extracted files
+            for item in Path(temp_dir).glob("*.exe"):
+                new_exe = item
+                break
+            if not new_exe:
+                raise FileNotFoundError("No .exe found in the update package.")
+
+            # Create a small batch file to replace the running exe
+            bat_path = Path(tempfile.gettempdir()) / "footballstat_updater.bat"
+
+            with open(bat_path, "w", encoding="utf-8") as bat:
+                bat.write(f"""@echo off
+        echo Updating FootballStat...
+        timeout /t 1 /nobreak >nul
+        move /y "{new_exe}" "{exe_path}" >nul
+        start "" "{exe_path}"
+        del "%~f0"
+        """)
+
+            # Run the batch file and exit
+            print(f"Launching self-update batch: {bat_path}")
+            subprocess.Popen(["cmd", "/c", "start", "", "/min", str(bat_path)], shell=True)
+
+            messagebox.showinfo("Update", "FootballStat will restart to complete the update.")
+            sys.exit(0)
+
         else:
             print("Unsupported platform for auto-update.")
             messagebox.showwarning("Update", "Automatic updates are not supported on this platform.")
