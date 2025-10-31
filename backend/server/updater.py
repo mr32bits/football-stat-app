@@ -151,14 +151,21 @@ def perform_update(new_version: Version, r: requests.Response):
             if not helper_path.exists():
                 raise FileNotFoundError(f"Missing updater.exe at {helper_path}")
 
-            print(f"Launching elevated updater to replace files in {app_dir}")
+            print(f"[Updater] Launching elevated updater for: {app_dir}")
+            print(f"[Updater] Temp update directory: {temp_dir}")
 
-            # Ask for elevation (UAC prompt)
+            # Handle nested extraction folder (GitHub Release zips often have one)
+            contents = list(Path(temp_dir).iterdir())
+            if len(contents) == 1 and contents[0].is_dir():
+                print(f"[Updater] Detected nested folder: {contents[0].name}")
+                temp_dir = contents[0]
+
+            # Ask for admin (UAC prompt)
             subprocess.run([
                 "powershell",
                 "-Command",
-                f'Start-Process -FilePath "{helper_path}" '
-                f'-ArgumentList "{app_dir}", "{temp_dir}" -Verb RunAs'
+                f"Start-Process -FilePath '{helper_path}' "
+                f"-ArgumentList '{app_dir}', '{temp_dir}' -Verb RunAs"
             ])
 
             messagebox.showinfo(
@@ -166,8 +173,8 @@ def perform_update(new_version: Version, r: requests.Response):
                 "The update will now be applied. You may be asked for Administrator permission."
             )
 
-            # Exit current app so files can be replaced
             sys.exit(0)
+
         else:
             print(f"Update failed:\n\tNot a Supported System: {sys.platform}")
             messagebox.showerror("Update Failed", f"Not a Supported System:{sys.platform}")
