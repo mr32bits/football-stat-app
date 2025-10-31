@@ -31,21 +31,10 @@ jobs:
           cd backend/server
           pyinstaller --onefile update_helper.py --name updater
 
-      - name: Copy updater.exe into dist folder
-        run: |
-          cd backend/server
-          ls dist
-          ls dist/server
-          Copy-Item -Path "dist/updater/updater.exe" -Destination "dist/server/" -Force -ErrorAction SilentlyContinue
-          if (-not (Test-Path "dist/server/updater.exe")) {
-            Write-Error "updater.exe not found or failed to copy!"
-            exit 1
-          }
-
       - name: Upload zipped build artifact
         uses: actions/upload-artifact@v4
         with:
           name: win
           path: |
             backend/server/dist/server.exe
-            backend/server/dist/server/updater.exe
+            backend/server/dist/updater.exe
