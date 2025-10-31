@@ -145,37 +145,32 @@ def perform_update(new_version: Version, r: requests.Response):
         elif sys.platform == "win32":
             exe_path = Path(sys.argv[0]).resolve()
             app_dir = exe_path.parent
-            new_exe = None
 
-            # Find the new exe inside extracted files
-            for item in Path(temp_dir).glob("*.exe"):
-                new_exe = item
-                break
-            if not new_exe:
-                raise FileNotFoundError("No .exe found in the update package.")
+            # Path to the bundled updater
+            helper_path = app_dir / "updater.exe"
+            if not helper_path.exists():
+                raise FileNotFoundError(f"Missing updater.exe at {helper_path}")
 
-            # Create a small batch file to replace the running exe
-            bat_path = Path(tempfile.gettempdir()) / "footballstat_updater.bat"
+            print(f"Launching elevated updater to replace files in {app_dir}")
 
-            with open(bat_path, "w", encoding="utf-8") as bat:
-                bat.write(f"""@echo off
-        echo Updating FootballStat...
-        timeout /t 1 /nobreak >nul
-        move /y "{new_exe}" "{exe_path}" >nul
-        start "" "{exe_path}"
-        del "%~f0"
-        """)
+            # Ask for elevation (UAC prompt)
+            subprocess.run([
+                "powershell",
+                "-Command",
+                f'Start-Process -FilePath "{helper_path}" '
+                f'-ArgumentList "{app_dir}", "{temp_dir}" -Verb RunAs'
+            ])
 
-            # Run the batch file and exit
-            print(f"Launching self-update batch: {bat_path}")
-            subprocess.Popen(["cmd", "/c", "start", "", "/min", str(bat_path)], shell=True)
+            messagebox.showinfo(
+                "Update",
+                "The update will now be applied. You may be asked for Administrator permission."
+            )
 
-            messagebox.showinfo("Update", "FootballStat will restart to complete the update.")
+            # Exit current app so files can be replaced
             sys.exit(0)
-
         else:
-            print("Unsupported platform for auto-update.")
-            messagebox.showwarning("Update", "Automatic updates are not supported on this platform.")
+            print(f"Update failed:\n\tNot a Supported System: {sys.platform}")
+            messagebox.showerror("Update Failed", f"Not a Supported System:{sys.platform}")
 
     except Exception as e:
         print(f"Update failed: {e}")

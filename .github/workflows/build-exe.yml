@@ -21,23 +21,31 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build executable with PyInstaller
+      - name: Build server.exe
         run: |
           cd backend/server
           pyinstaller --clean --noconfirm server.spec
 
-      - name: Zip the executable
+      - name: Build updater.exe
         run: |
-          $exePath = Get-ChildItem -Path backend/server/dist -Recurse -Filter server.exe | Select-Object -First 1
-          if (-not $exePath) {
-            Write-Error "Could not find server.exe in dist/"
+          cd backend/server
+          pyinstaller --onefile update_helper.py --name updater
+
+      - name: Copy updater.exe into dist folder
+        run: |
+          cd backend/server
+          ls dist
+          ls dist/server
+          Copy-Item -Path "dist/updater/updater.exe" -Destination "dist/server/" -Force -ErrorAction SilentlyContinue
+          if (-not (Test-Path "dist/server/updater.exe")) {
+            Write-Error "updater.exe not found or failed to copy!"
             exit 1
           }
-          Write-Host "Found EXE at $($exePath.FullName)"
-          Compress-Archive -Path $exePath.FullName -DestinationPath build.zip -Force
 
       - name: Upload zipped build artifact
         uses: actions/upload-artifact@v4
         with:
           name: win
-          path: backend/server/dist/server.exe
+          path: |
+            backend/server/dist/server.exe
+            backend/server/dist/server/updater.exe
