@@ -1,10 +1,8 @@
 import os
-from pathlib import Path
 import sys
 import threading
-from tkinter import messagebox
 import webbrowser
-from django.core.management import execute_from_command_line, call_command
+from django.core.management import execute_from_command_line
 
 from tkinter import *
 from tkinter import ttk

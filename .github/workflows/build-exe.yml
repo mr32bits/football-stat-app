@@ -29,10 +29,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p repo/keystore
-          echo "$TUFUP_ROOT_KEY" | base64 -d > repo/keystore/root_key
-          echo "$TUFUP_TARGETS_KEY" | base64 -d > repo/keystore/targets_key
-          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > repo/keystore/snapshot_key
-          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > repo/keystore/timestamp_key
+          echo "$TUFUP_ROOT_KEY" | base64 -d > repo/keystore/root
+          echo "$TUFUP_TARGETS_KEY" | base64 -d > repo/keystore/targets
+          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > repo/keystore/snapshot
+          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > repo/keystore/timestamp
         env:
           TUFUP_ROOT_KEY: ${{ secrets.TUFUP_ROOT_KEY }}
           TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}
@@ -53,6 +53,7 @@ jobs:
         run: |
           mkdir dist_bundle
           cp backend/server/dist/server.exe dist_bundle\
+          echo
           VERSION=${GITHUB_REF_NAME#v}
           tar -czf FootballStats-${VERSION}.tar.gz dist_bundle
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
@@ -60,10 +61,8 @@ jobs:
       - name: Add bundle to tufup repo
         shell: bash
         run: |
-          cd repo
           VERSION=${GITHUB_REF_NAME#v}
-          tufup targets add ${VERSION} ../FootballStats-${VERSION}.tar.gz keystore
-          cd ..
+          tufup targets add ${VERSION} ../FootballStats-${VERSION}.tar.gz "repo/keystore" --repo repo
 
       - name: Upload bundle to Release
         if: startsWith(github.ref, 'refs/tags/')

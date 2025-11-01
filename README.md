@@ -47,3 +47,5 @@ Move from gui: `.js` & `.css` to the `/static`-folder.<br> And move from gui: `i
 
 - [ ] Player: Change the Players Goal Stats `{0: 2, 1: 3}`
 - [ ] FIX build-exe.yaml Compression
+
+CHANGE THE VERSION IN .tufup-repo-config and updater.py

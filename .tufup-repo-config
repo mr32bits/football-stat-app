@@ -1,6 +1,6 @@
 {
     "app_name": "FootballStats",
-    "app_version_attr": null,
+    "app_version_attr": "0.0.1",
     "binary_diff": null,
     "encrypted_keys": [
         "root",
