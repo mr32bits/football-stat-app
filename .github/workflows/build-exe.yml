@@ -49,6 +49,7 @@ jobs:
           pyinstaller --clean --noconfirm server.spec
 
       - name: Package build into tar.gz
+        shell: bash
         run: |
           mkdir dist_bundle
           copy backend\server\dist\server.exe dist_bundle\
