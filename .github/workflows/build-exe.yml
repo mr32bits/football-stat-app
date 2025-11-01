@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          tufup targets add ${VERSION} ../FootballStats-${VERSION}.tar.gz "repo/keystore" --repo repo
+          tufup targets add ${VERSION} ../FootballStats-${VERSION}.tar.gz "repo/keystore"
 
       - name: Upload bundle to Release
         if: startsWith(github.ref, 'refs/tags/')
