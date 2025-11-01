@@ -61,7 +61,8 @@ jobs:
       - name: Add bundle to tufup repo
         shell: bash
         run: |
-          mkdir targets
+          mkdir repo/targets
+
           VERSION=${GITHUB_REF_NAME#v}
           echo "${VERSION}"
           echo "-----------------"
