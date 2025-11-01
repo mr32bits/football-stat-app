@@ -25,22 +25,6 @@ jobs:
           pip install -r requirements.txt
           pip install tufup pyinstaller
 
-      - name: Prepare tufup_root for build
-        run: |
-          cp repo/metadata/root.json backend/server/tufup_root
-
-      - name: Build server.exe
-        run: |
-          cd backend/server
-          pyinstaller --clean --noconfirm server.spec
-
-      - name: Package build into tar.gz
-        run: |
-          mkdir dist_bundle
-          copy backend\server\dist\server.exe dist_bundle\
-          tar -czf FootballStats-${{ github.ref_name || 'manual' }}.tar.gz dist_bundle
-          echo "Bundle created: FootballStats-${{ github.ref_name || 'manual' }}.tar.gz"
-
       - name: Restore tufup keystore
         shell: bash
         run: |
@@ -54,6 +38,24 @@ jobs:
           TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}
           TUFUP_SNAPSHOT_KEY: ${{ secrets.TUFUP_SNAPSHOT_KEY }}
           TUFUP_TIMESTAMP_KEY: ${{ secrets.TUFUP_TIMESTAMP_KEY }}
+
+      - name: Prepare tufup_root for build
+        run: |
+          cp repo/metadata/root.json backend/server/tufup_root
+
+      - name: Build server.exe
+        run: |
+          cd backend/server
+          pyinstaller --clean --noconfirm server.spec
+
+      - name: Package build into tar.gz
+        run: |
+          mkdir dist_bundle
+          copy backend\server\dist\server.exe dist_bundle\
+          VERSION=${GITHUB_REF_NAME#v}
+          VERSION=${VERSION:-manual}
+          tar -czf FootballStats-${VERSION}.tar.gz dist_bundle
+          echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
       - name: Add bundle to tufup repo
         shell: bash
