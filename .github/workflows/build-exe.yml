@@ -54,7 +54,6 @@ jobs:
           mkdir dist_bundle
           cp backend/server/dist/server.exe dist_bundle\
           VERSION=${GITHUB_REF_NAME#v}
-          VERSION=${VERSION:-manual}
           tar -czf FootballStats-${VERSION}.tar.gz dist_bundle
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
