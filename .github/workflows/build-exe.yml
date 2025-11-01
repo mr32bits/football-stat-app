@@ -55,7 +55,8 @@ jobs:
         shell: bash
         run: |
           cd repo
-          tufup targets add ${GITHUB_REF_NAME#v} ../FootballStats-${GITHUB_REF_NAME#v}.tar.gz keystore
+          VERSION=${GITHUB_REF_NAME#v}
+          tufup targets add ${VERSION} ../FootballStats-${VERSION}.tar.gz keystore
           cd ..
 
       - name: Upload bundle to Release
