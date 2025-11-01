@@ -68,6 +68,7 @@ jobs:
           echo "-----------------"
           ls repo -R
           echo "-----------------"
+          mkdir -p repo/targets
           cp FootballStats-${VERSION}.tar.gz repo/targets
           tufup targets add ${VERSION} FootballStats-${VERSION}.tar.gz "repo/keystore"
 
