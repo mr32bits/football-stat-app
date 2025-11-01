@@ -6,7 +6,7 @@ from tufup.client import Client
 from pathlib import Path
 
 APP_NAME = "football-stat-app"
-APP_VERSION = "0.0.1"
+APP_VERSION = "0.0.2"
 INSTALL_DIR = Path(__file__).parent
 METADATA_DIR = INSTALL_DIR / "tufup_root"
 TARGET_DIR = INSTALL_DIR / "updates"
@@ -16,7 +16,7 @@ TARGET_BASE_URL = "https://github.com/mr32bits/football-stat-app/releases/downlo
 
 def check_for_updates(active: bool = False) -> bool:
     """Try tufup first, fall back to GitHub API."""
-    print("Test")
+    print("App Version: ", APP_VERSION)
     try:
         client = Client(
             app_name=APP_NAME,
