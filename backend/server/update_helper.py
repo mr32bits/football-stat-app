@@ -31,17 +31,24 @@ def main():
     print(f"[Updater] App directory: {app_dir}")
     print(f"[Updater] Temp update dir: {temp_dir}")
 
-    # --- Wait for the main app to close ---
-    print("[Updater] Waiting for the main app to close...")
-    time.sleep(2)
-    for i in range(30):  # up to ~30 s
-        try:
-            os.rename(exe_path, exe_path)  # test lock
-            break
-        except PermissionError:
-            time.sleep(1)
-    else:
-        print("[Updater] Timeout waiting for app to close.")
+    print("[Updater] Giving Windows time to release file handles...")
+    time.sleep(3)
+
+    def wait_for_unlock(path, timeout=60):
+        print(f"[Updater] Waiting for {path.name} to unlock (max {timeout}s)...")
+        start = time.time()
+        while time.time() - start < timeout:
+            try:
+                # Try to open with exclusive access
+                with open(path, "a"):
+                    print(f"[Updater] {path.name} is unlocked.")
+                    return True
+            except PermissionError:
+                print("[Updater] File still locked, retrying...")
+                time.sleep(1)
+        print("[Updater] Timeout waiting for file unlock.")
+        return False
+    if not wait_for_unlock(exe_path):
         sys.exit(1)
 
     # --- Apply update ---
