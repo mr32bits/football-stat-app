@@ -80,7 +80,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
-          ls repo/metadata/
+          ls repo/metadata
           VERSION=${GITHUB_REF_NAME#v}
           gh release upload "${GITHUB_REF_NAME}" "repo/targets/FootballStats-${VERSION}.tar.gz"
         env:
