@@ -58,17 +58,6 @@ jobs:
           tar -czf FootballStats-${VERSION}.tar.gz dist_bundle
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
-      - name: Ensure TUF repository
-        shell: bash
-        run: |
-          mkdir -p repo/keystore
-          mkdir -p repo/targets
-          # Generate keys if missing
-          if [ ! -f repo/keystore/root ]; then
-            echo "Generating TUF keys..."
-            tufup keys generate --no-password repo/keystore
-          fi
-
       - name: Add bundle to tufup repo
         shell: bash
         run: |
@@ -79,7 +68,7 @@ jobs:
           echo "-----------------"
           ls repo -R
           echo "-----------------"
-          tufup -v targets add -r "${VERSION}" "FootballStats-${VERSION}.tar.gz" "repo/keystore"
+          tufup targets add ${VERSION} FootballStats-${VERSION}.tar.gz repo/keystore
 
       #- name: Sign repository metadata
       #  shell: bash
