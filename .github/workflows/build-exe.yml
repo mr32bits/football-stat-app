@@ -71,10 +71,10 @@ jobs:
           mkdir -p repo/targets
           tufup -v targets add -r "${VERSION}" "FootballStats-${VERSION}.tar.gz" "repo/keystore"
 
-      - name: Sign repository metadata
-        shell: bash
-        run: |
-          tufup sign targets "repo/keystore"
+      #- name: Sign repository metadata
+      #  shell: bash
+      #  run: |
+      #    tufup sign targets "repo/keystore"
 
       - name: Upload bundle to Release
         if: startsWith(github.ref, 'refs/tags/')
