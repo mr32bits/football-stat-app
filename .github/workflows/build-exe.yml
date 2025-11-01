@@ -66,6 +66,11 @@ jobs:
           VERSION=${GITHUB_REF_NAME#v}
           tufup targets add ${VERSION} dist_bundle/FootballStats-${VERSION}.tar.gz "repo/keystore"
 
+      - name: Sign repository metadata
+        shell: bash
+        run: |
+          tufup sign "repo/keystore"
+
       - name: Upload bundle to Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
