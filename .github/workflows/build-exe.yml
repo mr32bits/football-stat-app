@@ -69,7 +69,7 @@ jobs:
           ls repo -R
           echo "-----------------"
           mkdir -p repo/targets
-          tufup targets add ${VERSION} FootballStats-${VERSION}.tar.gz "repo/keystore"
+          tufup -v targets add -r "${VERSION}" "FootballStats-${VERSION}.tar.gz" "repo/keystore"
 
       - name: Sign repository metadata
         shell: bash
