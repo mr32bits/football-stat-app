@@ -13,7 +13,7 @@ print("Platform:", sys.platform)
 datas = []
 from PyInstaller.utils.hooks import collect_data_files
 datas += collect_data_files('rest_framework', include_py_files=True)
-datas += [(api_path, 'api'), (server_path, 'server'), (spec_root + '/staticfiles', 'staticfiles'), (spec_root + '/static', 'static'), (spec_root + '/templates', 'templates')]
+datas += [(api_path, 'api'), (server_path, 'server'), (spec_root+'/tufup_root', 'tufup_root'), (spec_root + '/staticfiles', 'staticfiles'), (spec_root + '/static', 'static'), (spec_root + '/templates', 'templates')]
 
 a = Analysis(
     ['launcher.py'],

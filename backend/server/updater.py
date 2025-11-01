@@ -16,6 +16,7 @@ TARGET_BASE_URL = "https://github.com/mr32bits/football-stat-app/releases/downlo
 
 def check_for_updates(active: bool = False) -> bool:
     """Try tufup first, fall back to GitHub API."""
+    print("Test")
     try:
         client = Client(
             app_name=APP_NAME,
@@ -27,7 +28,10 @@ def check_for_updates(active: bool = False) -> bool:
             target_base_url=TARGET_BASE_URL,
         )
         res = client.check_for_updates()
+        print(res)
         if res:
+            print("Update Available",
+                f"A new signed update is available.\nDo you want to download it?")
             reply = messagebox.askquestion(
                 "Update Available",
                 f"A new signed update is available.\nDo you want to download it?",
@@ -37,9 +41,10 @@ def check_for_updates(active: bool = False) -> bool:
                 messagebox.showinfo("Update Complete", "Please restart the app.")
                 return True
         elif active:
+            print("Up to date", f"Current Version: {APP_VERSION}")
             messagebox.showinfo("Up to date", f"Current Version: {APP_VERSION}")
         return False
 
     except Exception as tuf_error:
         print(f"TUF check failed ({tuf_error}), using GitHub fallback...")
-        return False
+    return False
