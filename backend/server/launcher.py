@@ -43,27 +43,8 @@ def ensure_database_ready():
         print(f"Migration failed: {e}")
 
 if __name__ == '__main__':
-
     print('sys.argv[0]: ', sys.argv[0])
 
-    '''
-    db_source = "db.sqlite3"
-
-    path = Path(sys.argv[0]).absolute()
-
-    if sys.platform == 'darwin':
-        path = path.parent.parent.joinpath('Resources', db_source)
-    else:
-        #TODO FIXME
-        print('not supported')
-
-
-    reply = messagebox.askquestion('', f'{path.exists()}\n{path}')
-    reply = messagebox.askquestion('', f'{sys.argv[0]}')
-
-    with open(path, 'rb') as f:
-        reply = messagebox.askquestion('', f'{f.read()[:20]}')
-    '''
     check_for_updates()
     ensure_database_ready()
     start_ui()

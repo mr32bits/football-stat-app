@@ -1,7 +1,10 @@
-name: Build Windows EXE
+name: Build Windows EXE and Sign with TUFUP
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -20,21 +23,54 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install tufup pyinstaller
 
       - name: Build server.exe
         run: |
           cd backend/server
           pyinstaller --clean --noconfirm server.spec
 
-      - name: Build updater.exe
+      - name: Package build into tar.gz
         run: |
-          cd backend/server
-          pyinstaller --onefile update_helper.py --name updater
+          mkdir dist_bundle
+          copy backend\server\dist\server.exe dist_bundle\
+          copy backend\server\dist\updater.exe dist_bundle\
+          tar -czf FootballStats-${{ github.ref_name || 'manual' }}.tar.gz dist_bundle
+          echo "Bundle created: FootballStats-${{ github.ref_name || 'manual' }}.tar.gz"
 
-      - name: Upload zipped build artifact
-        uses: actions/upload-artifact@v4
+      - name: Restore tufup keystore
+        shell: bash
+        run: |
+          mkdir -p repo/keystore
+          echo "$TUFUP_ROOT_KEY" | base64 -d > repo/keystore/root_key
+          echo "$TUFUP_TARGETS_KEY" | base64 -d > repo/keystore/targets_key
+          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > repo/keystore/snapshot_key
+          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > repo/keystore/timestamp_key
+        env:
+          TUFUP_ROOT_KEY: ${{ secrets.TUFUP_ROOT_KEY }}
+          TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}
+          TUFUP_SNAPSHOT_KEY: ${{ secrets.TUFUP_SNAPSHOT_KEY }}
+          TUFUP_TIMESTAMP_KEY: ${{ secrets.TUFUP_TIMESTAMP_KEY }}
+
+      - name: Add bundle to tufup repo
+        shell: bash
+        run: |
+          cd repo
+          tufup targets add ${GITHUB_REF_NAME#v} ../FootballStats-${GITHUB_REF_NAME#v}.tar.gz keystore
+          cd ..
+
+      - name: Upload bundle to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
         with:
-          name: win
-          path: |
-            backend/server/dist/server.exe
-            backend/server/dist/updater.exe
+          files: FootballStats-${{ github.ref_name }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy metadata to GitHub Pages
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: repo/metadata
