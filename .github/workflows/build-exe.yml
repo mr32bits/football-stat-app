@@ -78,9 +78,11 @@ jobs:
 
       - name: Upload bundle to Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: repo/targets/FootballStats-${GITHUB_REF_NAME#v}.tar.gz
+        shell: bash
+        run: |
+          ls repo/metadata/
+          VERSION=${GITHUB_REF_NAME#v}
+          gh release upload "${GITHUB_REF_NAME}" "repo/targets/FootballStats-${VERSION}.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -90,4 +92,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./repo/metadata
+          publish_dir: repo/metadata/
