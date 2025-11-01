@@ -34,7 +34,6 @@ jobs:
         run: |
           mkdir dist_bundle
           copy backend\server\dist\server.exe dist_bundle\
-          copy backend\server\dist\updater.exe dist_bundle\
           tar -czf FootballStats-${{ github.ref_name || 'manual' }}.tar.gz dist_bundle
           echo "Bundle created: FootballStats-${{ github.ref_name || 'manual' }}.tar.gz"
 
