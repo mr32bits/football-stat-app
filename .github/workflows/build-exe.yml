@@ -59,6 +59,7 @@ jobs:
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
       - name: Ensure TUF repository
+        shell: bash
         run: |
           mkdir -p repo/keystore
           mkdir -p repo/targets
