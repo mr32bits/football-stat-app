@@ -2,9 +2,10 @@ node_modules/
 dist
 build
 
-__pycache__/
+/__pycache/*
 *.py[codz]
 *$py.class
+*.pyc
 
 .venv
 /gui
