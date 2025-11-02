@@ -1,5 +1,5 @@
 {
-    "app_name": "FootballStatsApp",
+    "app_name": "FootballStats",
     "app_version_attr": "updater.__version__",
     "binary_diff": null,
     "encrypted_keys": [],
