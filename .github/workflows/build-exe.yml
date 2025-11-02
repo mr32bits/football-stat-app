@@ -25,14 +25,22 @@ jobs:
           pip install -r requirements.txt
           pip install tufup pyinstaller
 
+      - name: Restore tufup repo config
+        shell: bash
+        run: |
+          echo "$TUFUP_REPO_CONFIG" | base64 -d > backend/server/.tufup-repo-config
+          mkdir -p backend/server/repo/metadata
+        env:
+          TUFUP_REPO_CONFIG: ${{ secrets.TUFUP_REPO_CONFIG }}
+
       - name: Restore tufup keystore
         shell: bash
         run: |
           mkdir -p backend/server/repo/keystore
-          echo "$TUFUP_ROOT_KEY" | base64 -d > backend/server/repo/keystore/root
-          echo "$TUFUP_TARGETS_KEY" | base64 -d > backend/server/repo/keystore/targets
-          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > backend/server/repo/keystore/snapshot
-          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > backend/server/repo/keystore/timestamp
+          echo "$TUFUP_ROOT_KEY" | base64 -d > backend/server/repo/keystore/root.pub
+          echo "$TUFUP_TARGETS_KEY" | base64 -d > backend/server/repo/keystore/targets.pub
+          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > backend/server/repo/keystore/snapshot.pub
+          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > backend/server/repo/keystore/timestamp.pub
         env:
           TUFUP_ROOT_KEY: ${{ secrets.TUFUP_ROOT_KEY }}
           TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}

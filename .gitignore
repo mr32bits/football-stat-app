@@ -20,4 +20,4 @@ backend/server/repo/targets/
 backend/server/repo/keystore/
 
 backend/server/.tufup-repo-config
-
+backend/server/repo/.tufup-repo-config
