@@ -43,7 +43,7 @@ jobs:
         run: |
           cp backend/server/repo/metadata/root.json backend/server/tufup_root
 
-      - name: Build server.exe
+      - name: Build FootballStats.exe
         run: |
           cd backend/server
           pyinstaller --clean --noconfirm server.spec
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           mkdir dist_bundle
-          cp backend/server/dist/server.exe dist_bundle
+          cp backend/server/dist/FootballStats.exe dist_bundle
           echo
           VERSION=${GITHUB_REF_NAME#v}
           tar -czf FootballStats-${VERSION}.tar.gz dist_bundle
