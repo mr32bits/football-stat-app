@@ -13,5 +13,5 @@ __pycache__/
 
 .DS_Store
 
-repo/keystore/
-!repo/keystore/.gitkeep
+backend/server/repo/keystore
+!backend/server/repo/keystore/.gitkeep

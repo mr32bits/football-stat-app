@@ -41,7 +41,7 @@ if sys.platform == "darwin":
         a.scripts,
         [],
         exclude_binaries=True,
-        name='server',
+        name='FootballStats',
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,
@@ -61,7 +61,7 @@ else:
         a.datas,
         [],
         exclude_binaries=False,
-        name='server',
+        name='FootballStats',
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,
@@ -81,7 +81,7 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='server',
+    name='FootballStats',
 )
 
 if sys.platform == "darwin":
@@ -90,7 +90,7 @@ if sys.platform == "darwin":
         a.datas,
         upx=True,
         upx_exclude=[],
-        name='server.app',
+        name='FootballStats.app',
         icon=None,
         bundle_identifier=None
     )

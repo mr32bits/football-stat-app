@@ -5,7 +5,7 @@ from pathlib import Path
 from tufup.client import Client
 from pathlib import Path
 
-APP_NAME = "football-stat-app"
+APP_NAME = "FootballStats"
 APP_VERSION = "0.0.2"
 INSTALL_DIR = Path(__file__).parent
 METADATA_DIR = INSTALL_DIR / "tufup_root"

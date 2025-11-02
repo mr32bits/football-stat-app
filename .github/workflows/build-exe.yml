@@ -28,11 +28,11 @@ jobs:
       - name: Restore tufup keystore
         shell: bash
         run: |
-          mkdir -p repo/keystore
-          echo "$TUFUP_ROOT_KEY" | base64 -d > repo/keystore/root
-          echo "$TUFUP_TARGETS_KEY" | base64 -d > repo/keystore/targets
-          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > repo/keystore/snapshot
-          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > repo/keystore/timestamp
+          mkdir -p backend/server/repo/keystore
+          echo "$TUFUP_ROOT_KEY" | base64 -d > backend/server/repo/keystore/root
+          echo "$TUFUP_TARGETS_KEY" | base64 -d > backend/server/repo/keystore/targets
+          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > backend/server/repo/keystore/snapshot
+          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > backend/server/repo/keystore/timestamp
         env:
           TUFUP_ROOT_KEY: ${{ secrets.TUFUP_ROOT_KEY }}
           TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}
@@ -41,7 +41,7 @@ jobs:
 
       - name: Prepare tufup_root for build
         run: |
-          cp repo/metadata/root.json backend/server/tufup_root
+          cp backend/server/repo/metadata/root.json backend/server/tufup_root
 
       - name: Build server.exe
         run: |
@@ -61,16 +61,16 @@ jobs:
       - name: Add bundle to tufup repo
         shell: bash
         run: |
-          mkdir repo/targets
+          mkdir backend/server/repo/targets
 
           VERSION=${GITHUB_REF_NAME#v}
           echo "${VERSION}"
           echo "-----------------"
           ls
           echo "-----------------"
-          ls repo -R
+          ls backend/server/repo -R
           echo "-----------------"
-          tufup targets add ${VERSION} FootballStats-${VERSION}.tar.gz repo/keystore
+          tufup targets add ${VERSION} FootballStats-${VERSION}.tar.gz backend/server/repo/keystore
 
       #- name: Sign repository metadata
       #  shell: bash
@@ -83,12 +83,12 @@ jobs:
         run: |
           ls
           echo ----
-          ls repo
+          ls backend/server/repo
           echo -----
-          ls repo/targets
+          ls backend/server/repo/targets
           echo ----
           VERSION=${GITHUB_REF_NAME#v}
-          gh release upload "${GITHUB_REF_NAME}" "repo/targets/FootballStats-${VERSION}.tar.gz"
+          gh release upload "${GITHUB_REF_NAME}" "backend/server/repo/targets/FootballStats-${VERSION}.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -98,4 +98,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: repo/metadata/
+          publish_dir: backend/server/repo/metadata/
