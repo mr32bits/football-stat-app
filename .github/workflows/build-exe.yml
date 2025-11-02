@@ -54,8 +54,9 @@ jobs:
           cd backend/server
           ls -la dist
           VERSION=${GITHUB_REF_NAME#v}
+
           mkdir -p repo/targets
-          tar -cvzf repo/targets/FootballStats-${VERSION}.tar.gz -C dist FootballStats.exe
+          tar -cvzf dist/FootballStats-${VERSION}.tar.gz -C dist FootballStats.exe
           ls -la repo/targets -R
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
