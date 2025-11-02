@@ -53,7 +53,8 @@ jobs:
         run: |
           cd backend/server
           VERSION=${GITHUB_REF_NAME#v}
-          tar -czf dist/FootballStats-${VERSION}.tar.gz dist/FootballStats.exe
+          mkdir -p repo/targets
+          tar -C dist-czf repo/targets/FootballStats-${VERSION}.tar.gz FootballStats.exe
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
       - name: Add bundle to tufup repo
@@ -62,7 +63,6 @@ jobs:
           ls -la backend/server/.tufup*
           cp backend/server/.tufup-repo-config backend/server/repo.tufup-repo-config
           cd backend/server
-          mkdir -p targets
           VERSION=${GITHUB_REF_NAME#v}
           echo "Version: ${VERSION}"
           tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
