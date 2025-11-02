@@ -9,20 +9,7 @@
         "_type": "targets",
         "expires": "2026-01-31T00:41:38Z",
         "spec_version": "1.0.31",
-        "targets": {
-            "FootballStats-0.0.tar.gz": {
-                "custom": {
-                    "tufup": {
-                        "required": false
-                    },
-                    "user": null
-                },
-                "hashes": {
-                    "sha256": "4c8691ab673ae4aa697320ec39dc017eb41ef85c23719e5ae1d2aaeb58aa1099"
-                },
-                "length": 30870679
-            }
-        },
+        "targets": {},
         "version": 4
     }
 }
