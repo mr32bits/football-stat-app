@@ -59,11 +59,11 @@ jobs:
       - name: Add bundle to tufup repo
         shell: bash
         run: |
-          cd backend/server
+          cd backend/server/repo
           mkdir -p repo/targets
           VERSION=${GITHUB_REF_NAME#v}
           echo "${VERSION}"
-          tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
+          tufup targets add ${VERSION} ../dist/FootballStats-${VERSION}.tar.gz keystore
 
       #- name: Sign repository metadata
       #  shell: bash
