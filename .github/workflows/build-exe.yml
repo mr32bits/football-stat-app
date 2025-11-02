@@ -51,11 +51,9 @@ jobs:
       - name: Package build into tar.gz
         shell: bash
         run: |
-          cp backend/server/dist/FootballStats.exe dist_bundle
-          echo
           cd backend/server
           VERSION=${GITHUB_REF_NAME#v}
-          tar -czf dist/FootballStats-${VERSION}.tar.gz
+          tar -czf dist/FootballStats-${VERSION}.tar.gz dist/FootballStats.exe
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
       - name: Add bundle to tufup repo
