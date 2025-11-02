@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           cd backend/server/repo
-          mkdir -p repo/targets
+          mkdir targets
           VERSION=${GITHUB_REF_NAME#v}
           echo "${VERSION}"
           tufup targets add ${VERSION} ../dist/FootballStats-${VERSION}.tar.gz keystore

@@ -1,12 +1,13 @@
 from tkinter import messagebox
 from pathlib import Path
 
-
 from tufup.client import Client
 from pathlib import Path
 
+__version__ = "0.0.2"
+
 APP_NAME = "FootballStats"
-APP_VERSION = "0.0.2"
+APP_VERSION = __version__
 INSTALL_DIR = Path(__file__).parent
 METADATA_DIR = INSTALL_DIR / "tufup_root"
 TARGET_DIR = INSTALL_DIR / "updates"

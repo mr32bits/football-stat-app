@@ -1,12 +1,12 @@
 {
     "app_name": "FootballStatsApp",
-    "app_version_attr": "updater.APP_VERSION",
+    "app_version_attr": "updater.__version__",
     "binary_diff": null,
     "encrypted_keys": [],
     "expiration_days": {
         "root": 365,
-        "snapshot": 7,
-        "targets": 90,
+        "snapshot": 90,
+        "targets": 7,
         "timestamp": 1
     },
     "key_map": {
