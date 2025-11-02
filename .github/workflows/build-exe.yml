@@ -51,26 +51,28 @@ jobs:
       - name: Package build into tar.gz
         shell: bash
         run: |
-          mkdir dist_bundle
           cp backend/server/dist/FootballStats.exe dist_bundle
           echo
+          cd backend/server
           VERSION=${GITHUB_REF_NAME#v}
-          tar -czf FootballStats-${VERSION}.tar.gz dist_bundle
+          tar -czf dist/FootballStats-${VERSION}.tar.gz
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
       - name: Add bundle to tufup repo
         shell: bash
         run: |
           mkdir backend/server/repo/targets
-
+          cd backend/server
           VERSION=${GITHUB_REF_NAME#v}
           echo "${VERSION}"
           echo "-----------------"
           ls
           echo "-----------------"
+          ls backend/server
+          echo "-----------------"
           ls backend/server/repo -R
           echo "-----------------"
-          tufup targets add ${VERSION} FootballStats-${VERSION}.tar.gz backend/server/repo/keystore
+          tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
 
       #- name: Sign repository metadata
       #  shell: bash
