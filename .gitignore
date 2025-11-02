@@ -2,6 +2,7 @@ node_modules/
 dist
 build
 
+backend/server/__pycache__/
 /__pycache/*
 *.py[codz]
 *$py.class
@@ -14,5 +15,10 @@ build
 
 .DS_Store
 
+backend/server/repo/metadata/
+backend/server/repo/targets/
+
+backend/server/.tufup-repo-config
+
 backend/server/repo/keystore
-!backend/server/repo/keystore/.gitkeep
+backend/server/repo/targets
