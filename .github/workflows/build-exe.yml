@@ -49,8 +49,9 @@ jobs:
 
       - name: Prepare tufup_root for build
         run: |
+          cd backend/server
           tufup init -d
-          cp backend/server/repo/metadata/root.json backend/server/tufup_root
+          cp repo/metadata/root.json tufup_root
 
       - name: Build FootballStats.exe
         run: |
