@@ -4,7 +4,7 @@ from pathlib import Path
 from tufup.client import Client
 from pathlib import Path
 
-__version__ = "0.0.2"
+__version__ = "0.0.1"
 
 APP_NAME = "FootballStats"
 APP_VERSION = __version__
