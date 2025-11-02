@@ -28,8 +28,8 @@ jobs:
       - name: Restore tufup repo config
         shell: bash
         run: |
-          echo "$TUFUP_REPO_CONFIG" | base64 -d > backend/server/.tufup-repo-config
           mkdir -p backend/server/repo/metadata
+          echo "$TUFUP_REPO_CONFIG" | base64 -d > backend/server/.tufup-repo-config
         env:
           TUFUP_REPO_CONFIG: ${{ secrets.TUFUP_REPO_CONFIG }}
 
@@ -37,10 +37,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p backend/server/repo/keystore
-          echo "$TUFUP_ROOT_KEY" | base64 -d > backend/server/repo/keystore/root.pub
-          echo "$TUFUP_TARGETS_KEY" | base64 -d > backend/server/repo/keystore/targets.pub
-          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > backend/server/repo/keystore/snapshot.pub
-          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > backend/server/repo/keystore/timestamp.pub
+          echo "$TUFUP_ROOT_KEY" | base64 -d > backend/server/repo/keystore/root
+          echo "$TUFUP_TARGETS_KEY" | base64 -d > backend/server/repo/keystore/targets
+          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > backend/server/repo/keystore/snapshot
+          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > backend/server/repo/keystore/timestamp
         env:
           TUFUP_ROOT_KEY: ${{ secrets.TUFUP_ROOT_KEY }}
           TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}
@@ -49,6 +49,7 @@ jobs:
 
       - name: Prepare tufup_root for build
         run: |
+          tufup init -d
           cp backend/server/repo/metadata/root.json backend/server/tufup_root
 
       - name: Build FootballStats.exe
