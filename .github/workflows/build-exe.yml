@@ -67,12 +67,8 @@ jobs:
           cd backend/server
           VERSION=${GITHUB_REF_NAME#v}
           echo "Version: ${VERSION}"
-          tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
-
-      #- name: Sign repository metadata
-      #  shell: bash
-      #  run: |
-      #    tufup sign targets "repo/keystore"
+          tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore --force
+          tufup sign targets repo/keystore
 
       - name: Upload bundle to Release
         if: startsWith(github.ref, 'refs/tags/')
