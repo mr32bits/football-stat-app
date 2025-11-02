@@ -63,9 +63,6 @@ jobs:
           mkdir -p repo/targets
           VERSION=${GITHUB_REF_NAME#v}
           echo "${VERSION}"
-          echo "-----------------"
-          ls -R
-          echo "-----------------"
           tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
 
       #- name: Sign repository metadata
