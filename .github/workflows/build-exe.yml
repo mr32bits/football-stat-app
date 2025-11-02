@@ -52,22 +52,22 @@ jobs:
         shell: bash
         run: |
           cd backend/server
+          mkdir -p repo/targets
           ls -la dist
           VERSION=${GITHUB_REF_NAME#v}
-
-          mkdir -p repo/targets
           tar -cvzf dist/FootballStats-${VERSION}.tar.gz -C dist FootballStats.exe
-          ls -la repo/targets -R
+          ls -la dist
           echo "Bundle created: FootballStats-${VERSION}.tar.gz"
 
       - name: Add bundle to tufup repo
         shell: bash
         run: |
-          cp backend/server/.tufup-repo-config backend/server/repo.tufup-repo-config
           cd backend/server
+          ls -la repo/keystore
           VERSION=${GITHUB_REF_NAME#v}
           echo "Version: ${VERSION}"
-          tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
+          tufup targets add -r ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
+          ls -la repo/targets
           tufup sign targets repo/keystore
 
       - name: Upload bundle to Release
