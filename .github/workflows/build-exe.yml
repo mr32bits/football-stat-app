@@ -61,11 +61,11 @@ jobs:
         run: |
           ls -la backend/server/.tufup*
           cp backend/server/.tufup-repo-config backend/server/repo.tufup-repo-config
-          cd backend/server/repo
+          cd backend/server
           mkdir -p targets
           VERSION=${GITHUB_REF_NAME#v}
           echo "Version: ${VERSION}"
-          tufup targets add ${VERSION} ../dist/FootballStats-${VERSION}.tar.gz keystore
+          tufup targets add ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
 
       #- name: Sign repository metadata
       #  shell: bash
