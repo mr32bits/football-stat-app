@@ -21,6 +21,11 @@ else
     echo -e "${BOLD}Building version: ${CYAN}$VERSION${NC}"
 fi
 
+mkdir -p "repo-mac"
+cd "${REPO_DIR}"
+tufup init
+cd ..
+
 cp "${REPO_DIR}/metadata/root.json" "tufup_root/root.json"
 
 echo -n "Confirm: "
@@ -35,7 +40,7 @@ if [ -d "${DIST_DIR}/${APP_NAME}.app" ]; then
 
   echo "Signing macOS metadata..."
   cd "${REPO_DIR}"
-  tufup targets add "${VERSION}" "../${DIST_DIR}/${APP_NAME}-mac-${VERSION}.tar.gz" "keystore"
+  tufup targets add -r "${VERSION}" "../${DIST_DIR}/${APP_NAME}-mac-${VERSION}.tar.gz" "keystore"
   tufup sign targets "keystore"
 fi
 

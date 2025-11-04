@@ -17,6 +17,3 @@ __pycache__/
 backend/server/repo-*/metadata/
 backend/server/repo-*/targets/
 backend/server/repo-*/keystore/
-
-.tufup-repo-config
-.tufup-repo-config
