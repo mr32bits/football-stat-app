@@ -14,11 +14,11 @@ __pycache__/
 
 .DS_Store
 
-backend/server/repo/metadata/
-backend/server/repo/targets/
-backend/server/repo/keystore/
+backend/server/repo-*/metadata/
+backend/server/repo-*/targets/
+backend/server/repo-*/keystore/
 
-backend/server/.tufup-repo-config
-backend/server/repo/.tufup-repo-config
+.tufup-repo-config
+.tufup-repo-config
 
-sign_release.sh
+sign_release_*.sh

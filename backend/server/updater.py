@@ -5,7 +5,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.2"
+__version__ = "0.0.1"
 
 APP_NAME = "FootballStats"
 APP_VERSION = __version__
@@ -20,11 +20,10 @@ def check_for_updates(active: bool = False) -> bool:
     """Try tufup first, fall back to GitHub API."""
 
     os_name = platform.system().lower()
-    suffix = "win" if "windows" in os_name else "mac"
-    bundle_name = f"{APP_NAME}-{suffix}-{{version}}.tar.gz"
+    folder = "win" if "windows" in os_name else "mac"
 
     print("App Version: ", APP_VERSION)
-    print(f"Checking for updates ({suffix} build, version {APP_VERSION})")
+    print(f"Checking for updates ({os_name} build, version {APP_VERSION})")
 
     try:
         client = Client(
@@ -32,11 +31,11 @@ def check_for_updates(active: bool = False) -> bool:
             app_install_dir=str(INSTALL_DIR),
             current_version=APP_VERSION,
             metadata_dir=str(METADATA_DIR),
-            metadata_base_url=METADATA_BASE_URL,
+            metadata_base_url=METADATA_BASE_URL + folder + '/',
             target_dir=str(TARGET_DIR),
             target_base_url=TARGET_BASE_URL,
-            target_filename_template=bundle_name,
         )
+
         update_info = client.check_for_updates()
         print(update_info)
         if update_info:

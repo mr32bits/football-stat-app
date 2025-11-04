@@ -2,9 +2,6 @@ name: Build Windows EXE and Sign with TUFUP
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
 
 jobs:
   build:
@@ -23,82 +20,24 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install tufup pyinstaller
-
-      - name: Restore tufup repo config
-        shell: bash
-        run: |
-          mkdir -p backend/server/repo/metadata
-          echo "$TUFUP_REPO_CONFIG" | base64 -d > backend/server/.tufup-repo-config
-        env:
-          TUFUP_REPO_CONFIG: ${{ secrets.TUFUP_REPO_CONFIG }}
-
-      - name: Restore tufup keystore
-        shell: bash
-        run: |
-          mkdir -p backend/server/repo/keystore
-          echo "$TUFUP_ROOT_KEY" | base64 -d > backend/server/repo/keystore/root
-          echo "$TUFUP_TARGETS_KEY" | base64 -d > backend/server/repo/keystore/targets
-          echo "$TUFUP_SNAPSHOT_KEY" | base64 -d > backend/server/repo/keystore/snapshot
-          echo "$TUFUP_TIMESTAMP_KEY" | base64 -d > backend/server/repo/keystore/timestamp
-        env:
-          TUFUP_ROOT_KEY: ${{ secrets.TUFUP_ROOT_KEY }}
-          TUFUP_TARGETS_KEY: ${{ secrets.TUFUP_TARGETS_KEY }}
-          TUFUP_SNAPSHOT_KEY: ${{ secrets.TUFUP_SNAPSHOT_KEY }}
-          TUFUP_TIMESTAMP_KEY: ${{ secrets.TUFUP_TIMESTAMP_KEY }}
-
-      - name: Prepare tufup_root for build
-        run: |
-          cd backend/server
-          tufup init -d
-          cp repo/metadata/root.json tufup_root
 
       - name: Build FootballStats.exe
         run: |
           cd backend/server
           pyinstaller --clean --noconfirm server.spec
 
-      - name: Package build into tar.gz
-        shell: bash
+      - name: Zip the executable
         run: |
-          cd backend/server
-          mkdir -p repo/targets
-          ls -la dist
-          VERSION=${GITHUB_REF_NAME#v}
-          tar -cvzf dist/FootballStats-${VERSION}.tar.gz -C dist FootballStats.exe
-          ls -la dist
-          echo "Bundle created: FootballStats-${VERSION}.tar.gz"
+          $exePath = Get-ChildItem -Path backend/server/dist -Recurse -Filter FootballStats.exe | Select-Object -First 1
+          if (-not $exePath) {
+            Write-Error "Could not find FootballStats.exe in dist/"
+            exit 1
+          }
+          Write-Host "Found EXE at $($exePath.FullName)"
+          Compress-Archive -Path $exePath.FullName -DestinationPath win.zip -Force
 
-      - name: Add bundle to tufup repo
-        shell: bash
-        run: |
-          cd backend/server
-          ls -la repo/keystore
-          VERSION=${GITHUB_REF_NAME#v}
-          echo "Version: ${VERSION}"
-          tufup targets add -r ${VERSION} dist/FootballStats-${VERSION}.tar.gz repo/keystore
-          ls -la repo/targets
-          tufup sign targets repo/keystore
-
-      - name: Upload bundle to Release
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: bash
-        run: |
-          ls
-          echo ----
-          ls backend/server/repo
-          echo -----
-          ls backend/server/repo/targets
-          echo ----
-          VERSION=${GITHUB_REF_NAME#v}
-          gh release upload "${GITHUB_REF_NAME}" "backend/server/repo/targets/FootballStats-${VERSION}.tar.gz"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy metadata to GitHub Pages
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload zipped build artifact
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: backend/server/repo/metadata/
+          name: windows-exe
+          path: win.zip
