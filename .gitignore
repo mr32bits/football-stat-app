@@ -15,3 +15,5 @@ backend/server/repo-*/metadata/
 backend/server/repo-*/targets/
 backend/server/repo-*/keystore/
 
+tmp_pkg/
+
