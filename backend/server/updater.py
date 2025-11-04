@@ -5,7 +5,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.2"
+__version__ = "0.0.1"
 
 os_name = platform.system().lower()
 folder = "win" if "windows" in os_name else "mac"
@@ -17,7 +17,7 @@ METADATA_DIR = INSTALL_DIR / "tufup_root"
 TARGET_DIR = INSTALL_DIR / "updates"
 
 METADATA_BASE_URL = "https://mr32bits.github.io/football-stat-app/"
-TARGET_BASE_URL = "https://github.com/mr32bits/football-stat-app/releases/download/v{version}/"
+TARGET_BASE_URL = f"https://github.com/mr32bits/football-stat-app/releases/download/"
 
 def check_for_updates(active: bool = False) -> bool:
     """Try tufup first, fall back to GitHub API."""
@@ -46,6 +46,7 @@ def check_for_updates(active: bool = False) -> bool:
                 f"Version {update_info.version} available.\nDo you want to update?",
             )
             if reply == "yes":
+                client._target_base_url = f"{TARGET_BASE_URL}v{update_info.version}/"
                 client.download_and_apply_update(skip_confirmation=True)
                 messagebox.showinfo("Update Complete", "Please restart the app.")
                 return True
