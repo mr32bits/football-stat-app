@@ -2,12 +2,12 @@
  "signatures": [
   {
    "keyid": "485e2c766bb3f24de563c0c8156d897d9059647f3b68a1e6a3a25bfbd9ed9b8d",
-   "sig": "28214604a2d020257d77ba8cba41cb9649da813d3838e1426cbff78f7468bf7170b79f786173725fec61cda12874933c72124f7fcadce2e5e247dad5ae7fb60f"
+   "sig": "6e6cd25af5b53839c80e76ff5b2dff62d81beeee5cee9f84ae00f627077dcf3c84a86083911d828c93fc354bfb130a32b9e36f4049b6685b6f36f3497ff11b0a"
   }
  ],
  "signed": {
   "_type": "targets",
-  "expires": "2026-02-02T14:08:13Z",
+  "expires": "2026-02-02T14:21:04Z",
   "spec_version": "1.0.31",
   "targets": {
    "FootballStats-mac-0.0.1.tar.gz": {
@@ -18,37 +18,11 @@
      "user": null
     },
     "hashes": {
-     "sha256": "f1b23d884cdd9576aaa8e03679d23549ff189c0984b3298cdc9a39a24fa19372"
+     "sha256": "37554863a73b9e0fc420d90cf629020413b00d218e4d8b418b84af77fd7ea49c"
     },
-    "length": 30863647
-   },
-   "FootballStats-mac-0.0.2.patch": {
-    "custom": {
-     "tufup": {
-      "tar_hash": "ef811cd1a329e9bea9a965bdc9f9417451545ac719a46ffa866bc697d501fea2",
-      "tar_hash_algorithm": "sha256",
-      "tar_size": 30965760
-     },
-     "user": null
-    },
-    "hashes": {
-     "sha256": "f135bcb31fecd35144608cea79d90fe5006e78835877a71bd46b5a4989604581"
-    },
-    "length": 18481762
-   },
-   "FootballStats-mac-0.0.2.tar.gz": {
-    "custom": {
-     "tufup": {
-      "required": true
-     },
-     "user": null
-    },
-    "hashes": {
-     "sha256": "5fe686b2030b4f410386630bbbc6282f65df369970e42343714d4b5c9e69f899"
-    },
-    "length": 30862930
+    "length": 30863341
    }
   },
-  "version": 21
+  "version": 24
  }
 }
