@@ -2,8 +2,7 @@ node_modules/
 dist
 build
 
-backend/server/__pycache__/
-/__pycache/*
+__pycache__/
 *.py[codz]
 *$py.class
 *.pyc
@@ -21,3 +20,5 @@ backend/server/repo/keystore/
 
 backend/server/.tufup-repo-config
 backend/server/repo/.tufup-repo-config
+
+sign_release.sh

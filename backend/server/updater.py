@@ -3,6 +3,7 @@ from pathlib import Path
 
 from tufup.client import Client
 from pathlib import Path
+import platform
 
 __version__ = "0.0.2"
 
@@ -17,7 +18,14 @@ TARGET_BASE_URL = "https://github.com/mr32bits/football-stat-app/releases/downlo
 
 def check_for_updates(active: bool = False) -> bool:
     """Try tufup first, fall back to GitHub API."""
+
+    os_name = platform.system().lower()
+    suffix = "win" if "windows" in os_name else "mac"
+    bundle_name = f"{APP_NAME}-{suffix}-{{version}}.tar.gz"
+
     print("App Version: ", APP_VERSION)
+    print(f"Checking for updates ({suffix} build, version {APP_VERSION})")
+
     try:
         client = Client(
             app_name=APP_NAME,
@@ -27,15 +35,16 @@ def check_for_updates(active: bool = False) -> bool:
             metadata_base_url=METADATA_BASE_URL,
             target_dir=str(TARGET_DIR),
             target_base_url=TARGET_BASE_URL,
+            target_filename_template=bundle_name,
         )
-        res = client.check_for_updates()
-        print(res)
-        if res:
+        update_info = client.check_for_updates()
+        print(update_info)
+        if update_info:
             print("Update Available",
-                f"A new signed update is available.\nDo you want to download it?")
+                f"Version {update_info['version']} available.\nDo you want to update?")
             reply = messagebox.askquestion(
                 "Update Available",
-                f"A new signed update is available.\nDo you want to download it?",
+                f"Version {update_info['version']} available.\nDo you want to update?",
             )
             if reply == "yes":
                 client.download_and_apply_update(skip_confirmation=True)
@@ -47,5 +56,5 @@ def check_for_updates(active: bool = False) -> bool:
         return False
 
     except Exception as tuf_error:
-        print(f"TUF check failed ({tuf_error}), using GitHub fallback...")
+        print(f"TUF check failed ({tuf_error})")
     return False
