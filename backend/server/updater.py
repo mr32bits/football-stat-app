@@ -5,7 +5,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.2"
+__version__ = "0.0.1"
 
 os_name = platform.system().lower()
 folder = "win" if "windows" in os_name else "mac"
@@ -13,14 +13,19 @@ folder = "win" if "windows" in os_name else "mac"
 APP_NAME = "FootballStats"+ "-" + folder
 APP_VERSION = __version__
 if platform.system() == "Darwin":
-    INSTALL_DIR = Path.home() / "Library/Application Support" / "FootballStats"
+    BASE_DIR = Path.home() / "Library/Application Support" / "FootballStats"
+elif platform.system() == "Windows":
+    BASE_DIR = Path.home() / "AppData" / "Local" / "FootballStats"
 else:
-    INSTALL_DIR = Path(__file__).parent
-METADATA_DIR = INSTALL_DIR / "tufup_root"
-TARGET_DIR = INSTALL_DIR / "updates"
+    print("Not Supported System")
+
+METADATA_DIR = BASE_DIR / "tufup_root"
+TARGET_DIR = BASE_DIR / "updates"
+EXTRACT_DIR = BASE_DIR / "extract"
 
 METADATA_DIR.mkdir(parents=True, exist_ok=True)
 TARGET_DIR.mkdir(parents=True, exist_ok=True)
+EXTRACT_DIR.mkdir(parents=True, exist_ok=True)
 
 METADATA_BASE_URL = "https://mr32bits.github.io/football-stat-app/"
 TARGET_BASE_URL = f"https://github.com/mr32bits/football-stat-app/releases/download/"
@@ -34,12 +39,13 @@ def check_for_updates(active: bool = False) -> bool:
     try:
         client = Client(
             app_name=APP_NAME,
-            app_install_dir=str(INSTALL_DIR),
+            app_install_dir=str(BASE_DIR),
             current_version=APP_VERSION,
             metadata_dir=str(METADATA_DIR),
             metadata_base_url=METADATA_BASE_URL + folder + '/',
             target_dir=str(TARGET_DIR),
             target_base_url=TARGET_BASE_URL,
+            extract_dir=str(TARGET_DIR)
         )
 
         update_info = client.check_for_updates()
@@ -53,6 +59,7 @@ def check_for_updates(active: bool = False) -> bool:
             )
             if reply == "yes":
                 client._target_base_url = f"{TARGET_BASE_URL}v{update_info.version}/"
+                print(client._target_base_url)
                 client.download_and_apply_update(skip_confirmation=True)
                 messagebox.showinfo("Update Complete", "Please restart the app.")
                 return True
@@ -63,4 +70,5 @@ def check_for_updates(active: bool = False) -> bool:
 
     except Exception as tuf_error:
         print(f"TUF check failed ({tuf_error})")
+        print(f"{tuf_error.with_traceback()}")
     return False
