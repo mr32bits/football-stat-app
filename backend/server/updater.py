@@ -5,16 +5,22 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.2"
+__version__ = "0.0.1"
 
 os_name = platform.system().lower()
 folder = "win" if "windows" in os_name else "mac"
 
 APP_NAME = "FootballStats"+ "-" + folder
 APP_VERSION = __version__
-INSTALL_DIR = Path(__file__).parent
+if platform.system() == "Darwin":
+    INSTALL_DIR = Path.home() / "Library/Application Support" / "FootballStats"
+else:
+    INSTALL_DIR = Path(__file__).parent
 METADATA_DIR = INSTALL_DIR / "tufup_root"
 TARGET_DIR = INSTALL_DIR / "updates"
+
+METADATA_DIR.mkdir(parents=True, exist_ok=True)
+TARGET_DIR.mkdir(parents=True, exist_ok=True)
 
 METADATA_BASE_URL = "https://mr32bits.github.io/football-stat-app/"
 TARGET_BASE_URL = f"https://github.com/mr32bits/football-stat-app/releases/download/"
