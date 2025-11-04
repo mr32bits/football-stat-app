@@ -7,7 +7,10 @@ import platform
 
 __version__ = "0.0.1"
 
-APP_NAME = "FootballStats"
+os_name = platform.system().lower()
+folder = "win" if "windows" in os_name else "mac"
+
+APP_NAME = "FootballStats"+ "-" + folder
 APP_VERSION = __version__
 INSTALL_DIR = Path(__file__).parent
 METADATA_DIR = INSTALL_DIR / "tufup_root"
@@ -18,9 +21,6 @@ TARGET_BASE_URL = "https://github.com/mr32bits/football-stat-app/releases/downlo
 
 def check_for_updates(active: bool = False) -> bool:
     """Try tufup first, fall back to GitHub API."""
-
-    os_name = platform.system().lower()
-    folder = "win" if "windows" in os_name else "mac"
 
     print("App Version: ", APP_VERSION)
     print(f"Checking for updates ({os_name} build, version {APP_VERSION})")

@@ -1,4 +1,4 @@
-name: Build Windows EXE and Sign with TUFUP
+name: Build Windows EXE
 
 on:
   workflow_dispatch:
