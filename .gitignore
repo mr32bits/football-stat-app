@@ -20,5 +20,3 @@ backend/server/repo-*/keystore/
 
 .tufup-repo-config
 .tufup-repo-config
-
-sign_release_*.sh
