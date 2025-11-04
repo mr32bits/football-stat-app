@@ -2,12 +2,12 @@
  "signatures": [
   {
    "keyid": "485e2c766bb3f24de563c0c8156d897d9059647f3b68a1e6a3a25bfbd9ed9b8d",
-   "sig": "9a5e9a2842614783c84cef6aee3c1fee4374b5540a8a29475d488703ac497ead0a447e61773d354afeff265bb78819ffc3582482768884a7f878161a3a32a001"
+   "sig": "91798c4bcb39a09a0a72de4aae3f5a30b8aba252ffa6b20ea95ab5a5123b5bc4f07daf197cd51286b6114f2af1daef49c2dd4f2028e407dbb0a76a0c6b0b9c09"
   }
  ],
  "signed": {
   "_type": "targets",
-  "expires": "2026-02-02T15:47:51Z",
+  "expires": "2026-02-02T16:09:08Z",
   "spec_version": "1.0.31",
   "targets": {
    "FootballStats-mac-0.0.1.tar.gz": {
@@ -18,11 +18,11 @@
      "user": null
     },
     "hashes": {
-     "sha256": "1a1405f773015c379c8ec3e9cd207e4d3aebf82cae5a3d41673c8deaf0183a60"
+     "sha256": "c2b5c3191bf1749f01d7db3089de4a0b0332e3a859c34fb10877ecca7900fa8c"
     },
-    "length": 31099064
+    "length": 31114479
    }
   },
-  "version": 28
+  "version": 34
  }
 }
