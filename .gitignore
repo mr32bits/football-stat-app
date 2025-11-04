@@ -3,9 +3,6 @@ dist
 build
 
 __pycache__/
-*.py[codz]
-*$py.class
-*.pyc
 
 .venv
 /gui
@@ -17,3 +14,4 @@ __pycache__/
 backend/server/repo-*/metadata/
 backend/server/repo-*/targets/
 backend/server/repo-*/keystore/
+
