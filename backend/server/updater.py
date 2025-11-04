@@ -5,7 +5,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.2"
+__version__ = "0.0.1"
 
 os_name = platform.system().lower()
 folder = "win" if "windows" in os_name else "mac"
@@ -40,10 +40,10 @@ def check_for_updates(active: bool = False) -> bool:
         print(update_info)
         if update_info:
             print("Update Available",
-                f"Version {update_info['version']} available.\nDo you want to update?")
+                f"Version {update_info.version} available.\nDo you want to update?")
             reply = messagebox.askquestion(
                 "Update Available",
-                f"Version {update_info['version']} available.\nDo you want to update?",
+                f"Version {update_info.version} available.\nDo you want to update?",
             )
             if reply == "yes":
                 client.download_and_apply_update(skip_confirmation=True)
