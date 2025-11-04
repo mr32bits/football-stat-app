@@ -36,13 +36,12 @@ pyinstaller --clean --noconfirm server.spec
 # --- MACOS ---
 if [ -d "${DIST_DIR}/${APP_NAME}.app" ]; then
     echo "Building macOS bundle..."
-    #tar -C "${DIST_DIR}" -czf "${DIST_DIR}/${APP_NAME}-mac-${VERSION}.tar.gz" "${APP_NAME}.app"
 
     echo "Signing macOS metadata..."
     mkdir -p tmp_pkg
     cp -R dist/FootballStats.app tmp_pkg/
     cd "${REPO_DIR}"
-    tufup targets add -r "${VERSION}" "../tmp_pkg/${APP_NAME}.app" "keystore"
+    tufup targets add -r "${VERSION}" "../tmp_pkg" "keystore"
     tufup sign targets "keystore"
 fi
 
