@@ -11,7 +11,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.1"
+__version__ = "0.0.0"
 
 os_name = platform.system().lower()
 system = "win" if "windows" in os_name else "mac"
