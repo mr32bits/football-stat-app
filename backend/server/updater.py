@@ -174,7 +174,7 @@ def custom_windows_install(
         robocopy "%SRC%" "%DST%" /E /IS /IT /MOVE /R:5 /W:2 >nul
 
         echo Restarting app...
-        start "FootballStats" /d "%DST%" FootballStats.exe
+        start "" "%DST%\\FootballStats.exe"
 
         echo Cleaning up temp files...
         rmdir /S /Q "%SRC%" >nul
