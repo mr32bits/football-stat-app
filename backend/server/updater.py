@@ -60,7 +60,7 @@ def check_for_updates(active: bool = False) -> bool:
         )
 
         update_info = client.check_for_updates()
-        print("Update:" + update_info)
+        print(update_info)
         if update_info:
             print("Update Available",
                 f"Version {update_info.version} available.\nDo you want to update?")
