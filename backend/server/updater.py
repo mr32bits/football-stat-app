@@ -155,26 +155,29 @@ def custom_windows_install(
         set EXE="{exe_path}"
         set SRC="{src_dir}"
         set DST="{dst_dir}"
-        echo Waiting for {exe_name} to close...
 
+        echo Attempting to close running app...
+        taskkill /IM {exe_name} /F >nul 2>&1
+        timeout /t 1 >nul
+
+        echo Waiting for process to release...        
         :waitloop
-        rem Check if the EXE is still locked
         2>nul (>>%EXE% echo.) && (
-            echo File is free, continuing...
+        echo App closed, continuing...
         ) || (
-            echo File still in use, waiting 2 seconds...
-            timeout /t 2 /nobreak >nul
-            goto waitloop
+        echo File still locked, waiting 2 seconds...
+        timeout /t 2 /nobreak >nul
+        goto waitloop
         )
 
         echo Applying update from %SRC% to %DST% ...
         robocopy "%SRC%" "%DST%" /E /IS /IT /MOVE /R:5 /W:2 >nul
 
         echo Restarting app...
-        start "" "%EXE%"
+        start /d "%EXE%"
 
         echo Cleaning up temp files...
-        rmdir /S /Q "%SRC%"
+        rmdir /S /Q "%SRC%" >nul
 
         echo Done.
         del "%~f0"
@@ -183,6 +186,7 @@ def custom_windows_install(
 
     # Launch helper in background, then exit main app
     print(f"[TUFUP] Launching updater helper: {updater_script}")
-    subprocess.Popen(['cmd', '/k', str(updater_script)], creationflags=subprocess.CREATE_NEW_CONSOLE)
+    subprocess.Popen(['cmd', '/c', str(updater_script)], creationflags=subprocess.CREATE_NEW_CONSOLE)
     #["powershell", "-Command", f'Start-Process cmd -ArgumentList "/k","{updater_script}" -Verb RunAs']
+    print("[TUFUP] Exiting app to allow update...")
     sys.exit(0)
