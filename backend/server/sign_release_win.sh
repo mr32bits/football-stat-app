@@ -5,7 +5,7 @@ BOLD="\033[1m"
 CYAN="\033[0;36m"
 
 APP_NAME="FootballStats"
-REPO_DIR="repo-mac"
+REPO_DIR="repo-win"
 DIST_DIR="dist"
 
 VERSION_FILE="updater.py"
@@ -32,17 +32,16 @@ read -r
 pyinstaller --clean --noconfirm server.spec
 
 # --- MACOS ---
-if [ -d "${DIST_DIR}/${APP_NAME}.app" ]; then
+if [ -d "${DIST_DIR}/${APP_NAME}.exe" ]; then
     echo "Building macOS bundle..."
 
     echo "Signing macOS metadata..."
-    mkdir -p tmp_pkg
-    cp -R dist/FootballStats.app tmp_pkg
+    tar -czf "${DIST_DIR}/${APP_NAME}-win-${VERSION}.tar.gz" -C "${DIST_DIR}" "${APP_NAME}.exe"
+    
     cd "${REPO_DIR}"
-    tufup targets add -r "${VERSION}" "../tmp_pkg" "keystore"
+    tufup targets add -r "${VERSION}" "../${DIST_DIR}/${APP_NAME}-win-${VERSION}.tar.gz" "keystore"
     tufup sign targets "keystore"
     cd ..
-    rm -rf tmp_pkg
 fi
 
 echo "Successfully updated"

@@ -20,13 +20,13 @@ def run_server(button):
 
 def start_ui():
     root = Tk()
-    root.title('Football Stat Launcher')
+    root.title('Football Stats Launcher')
     root.geometry('250x100')
     root.resizable(False, False)
     frm = ttk.Frame(root, padding=10)
     frm.pack()
 
-    ttk.Label(frm, text='Start Football Stat Server').pack()
+    ttk.Label(frm, text='Start Football Stats Server').pack()
     start_btn = ttk.Button(frm, text='Start')
     start_btn.configure(command=lambda: run_server(start_btn))
     start_btn.pack()
@@ -41,8 +41,6 @@ def ensure_database_ready():
         print(f"Migration failed: {e}")
 
 if __name__ == '__main__':
-    print('sys.argv[0]: ', sys.argv[0])
-
     check_for_updates()
     ensure_database_ready()
     start_ui()
