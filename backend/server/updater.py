@@ -29,6 +29,7 @@ else:
 
 METADATA_DIR = BASE_DIR / "tufup_root"
 TARGET_DIR = BASE_DIR / "updates"
+EXTRACT_DIR = TARGET_DIR / "extract"
 
 METADATA_BASE_URL = "https://mr32bits.github.io/football-stat-app/"
 TARGET_BASE_URL = f"https://github.com/mr32bits/football-stat-app/releases/download/"
@@ -41,6 +42,7 @@ def check_for_updates(active: bool = False) -> bool:
     try:
         METADATA_DIR.mkdir(parents=True, exist_ok=True)
         TARGET_DIR.mkdir(parents=True, exist_ok=True)
+        EXTRACT_DIR.mkdir(parents=True, exist_ok=True)
 
         if not Path(METADATA_DIR, "root.json").exists():
             with open(str(Path(METADATA_DIR, "root.json")), 'wb') as f:
@@ -57,6 +59,7 @@ def check_for_updates(active: bool = False) -> bool:
             metadata_base_url=METADATA_BASE_URL + system + '/',
             target_dir=str(TARGET_DIR),
             target_base_url=TARGET_BASE_URL,
+            extract_dir=str(EXTRACT_DIR) if platform.system() == "Windows" else None,
         )
 
         update_info = client.check_for_updates()
