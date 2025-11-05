@@ -75,97 +75,7 @@ def check_for_updates(active: bool = False) -> bool:
             )
             if reply == "yes":
                 client._target_base_url = f"{TARGET_BASE_URL}v{update_info.version}/"
-                def custom_mac_install(src_dir: Union[pathlib.Path, str], dst_dir: Union[pathlib.Path, str], exclude_from_purge: List[Union[pathlib.Path, str]] = None, purge_dst_dir: bool =False, symlinks: bool = False, **kwargs):
-                    src_dir = pathlib.Path(src_dir)
-                    dst_dir = pathlib.Path(dst_dir)
-                    exclude_from_purge = [pathlib.Path(p) for p in (exclude_from_purge or [])]
-                    print(f"Installing update from {src_dir} → {dst_dir}")
-
-                    from tufup.utils.platform_specific import remove_path
-                    if purge_dst_dir:
-                        exclude_from_purge = (
-                            [  # enforce path objects
-                                pathlib.Path(item) for item in exclude_from_purge
-                            ]
-                            if exclude_from_purge
-                            else []
-                        )
-                        for path in pathlib.Path(dst_dir).iterdir():
-                            if path not in exclude_from_purge:
-                                remove_path(path=path)
-
-                    #Copy new files
-                    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True, symlinks=symlinks)
-
-                    #clean up the temp files
-                    for path in pathlib.Path(src_dir).iterdir():
-                        remove_path(path=path)
-
-                    time.sleep(1.5)
-
-                    app_bundle = dst_dir / "FootballStats.app"
-                    if app_bundle.exists():
-                        print(f"Restarting {app_bundle} ...")
-                        subprocess.Popen(["open", "-n", f"{app_bundle}"])
-                    else:
-                        print(f"App bundle not found at {app_bundle}")
-                    
-                    #remove updates folder
-                    remove_path(path=TARGET_DIR)
-
-                    #closing app
-                    sys.exit(0)
-                def custom_windows_install(
-                    src_dir: str,
-                    dst_dir: str,
-                    purge_dst_dir: bool = False,
-                    exclude_from_purge=None,
-                    symlinks: bool = False,
-                    **kwargs,
-                ):
-                    src_dir = Path(src_dir)
-                    dst_dir = Path(dst_dir)
-                    exclude_from_purge = [Path(p) for p in (exclude_from_purge or [])]
-                    print(f"Installing update from {src_dir} → {dst_dir}")
-                    from tufup.utils.platform_specific import remove_path
-                        # Build a small one-off script that does the move after exit
-                    exe_name = "FootballStats.exe"
-                    exe_path = dst_dir / exe_name
-                    updater_script = Path(os.getenv("TEMP")) / "tufup_update_helper.bat"
-
-                    with open(updater_script, "w", encoding="utf-8") as f:
-                        f.write(f"""@echo off
-                        setlocal
-                        echo Waiting for {exe_name} to close...
-                        set EXE="{exe_path}"
-
-                        :waitloop
-                        rem Check if the EXE is still locked
-                        2>nul (>>%EXE% echo.) && (
-                        echo File is free, continuing...
-                        ) || (
-                        echo File still in use, waiting 2 seconds...
-                        timeout /t 2 /nobreak >nul
-                        goto waitloop
-                        )
-
-                        echo Copying new version...
-                        robocopy "{src_dir}" "{dst_dir}" /E /IS /IT /MOVE /R:5 /W:2 >nul
-
-                        echo Restarting app...
-                        start "" "{exe_path}"
-
-                        echo Cleaning up temp files...
-                        rmdir /S /Q "{src_dir}"
-                        del "%~f0"
-                        exit
-                        """)
-
-                    # Launch helper in background, then exit main app
-                    print(f"[TUFUP] Launching updater helper: {updater_script}")
-                    subprocess.Popen(['cmd', '/c', str(updater_script)], creationflags=subprocess.CREATE_NEW_CONSOLE)
-                    sys.exit(0)
-
+                
                 client.download_and_apply_update(skip_confirmation=True, install=custom_mac_install if platform.system() == "Darwin" else custom_windows_install)
                 return True
         elif active:
@@ -177,3 +87,102 @@ def check_for_updates(active: bool = False) -> bool:
         print(f"TUF check failed ({tuf_error})")
         print(f"{tuf_error.with_traceback()}")
     return False
+
+def custom_mac_install(src_dir: Union[pathlib.Path, str], dst_dir: Union[pathlib.Path, str], exclude_from_purge: List[Union[pathlib.Path, str]] = None, purge_dst_dir: bool =False, symlinks: bool = False, **kwargs):
+    src_dir = pathlib.Path(src_dir)
+    dst_dir = pathlib.Path(dst_dir)
+    exclude_from_purge = [pathlib.Path(p) for p in (exclude_from_purge or [])]
+    print(f"Installing update from {src_dir} → {dst_dir}")
+
+    from tufup.utils.platform_specific import remove_path
+    if purge_dst_dir:
+        exclude_from_purge = (
+            [  # enforce path objects
+                pathlib.Path(item) for item in exclude_from_purge
+            ]
+            if exclude_from_purge
+            else []
+        )
+        for path in pathlib.Path(dst_dir).iterdir():
+            if path not in exclude_from_purge:
+                remove_path(path=path)
+
+    #Copy new files
+    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True, symlinks=symlinks)
+
+    #clean up the temp files
+    for path in pathlib.Path(src_dir).iterdir():
+        remove_path(path=path)
+
+    time.sleep(1.5)
+
+    app_bundle = dst_dir / "FootballStats.app"
+    if app_bundle.exists():
+        print(f"Restarting {app_bundle} ...")
+        subprocess.Popen(["open", "-n", f"{app_bundle}"])
+    else:
+        print(f"App bundle not found at {app_bundle}")
+    
+    #remove updates folder
+    remove_path(path=TARGET_DIR)
+
+    #closing app
+    sys.exit(0)
+                
+def custom_windows_install(
+    src_dir: str,
+    dst_dir: str,
+    purge_dst_dir: bool = False,
+    exclude_from_purge=None,
+    **kwargs,
+):
+    src_dir = Path(src_dir)
+    dst_dir = Path(dst_dir)
+    exclude_from_purge = [Path(p) for p in (exclude_from_purge or [])]
+    print(f"Installing update from {src_dir} → {dst_dir}")
+
+    # Build a small one-off script that does the move after exit
+    exe_name = "FootballStats.exe"
+    exe_path = dst_dir / exe_name
+    updater_script = Path(os.getenv("TEMP")) / "tufup_update_helper.bat"
+
+    with open(updater_script, "w", encoding="utf-8") as f:
+        f.write(f"""@echo off
+        echo ------------------------------
+        echo FootballStats Updater
+        echo ------------------------------
+        setlocal enabledelayedexpansion
+        set EXE="{exe_path}"
+        set SRC="{src_dir}"
+        set DST="{dst_dir}"
+        echo Waiting for {exe_name} to close...
+
+        :waitloop
+        rem Check if the EXE is still locked
+        2>nul (>>%EXE% echo.) && (
+            echo File is free, continuing...
+        ) || (
+            echo File still in use, waiting 2 seconds...
+            timeout /t 2 /nobreak >nul
+            goto waitloop
+        )
+
+        echo Applying update from %SRC% to %DST% ...
+        robocopy "%SRC%" "%DST%" /E /IS /IT /MOVE /R:5 /W:2 >nul
+
+        echo Restarting app...
+        start "" "%EXE%"
+
+        echo Cleaning up temp files...
+        rmdir /S /Q "%SRC%"
+
+        echo Done.
+        del "%~f0"
+        exit /b 0
+        """)
+
+    # Launch helper in background, then exit main app
+    print(f"[TUFUP] Launching updater helper: {updater_script}")
+    subprocess.Popen(['cmd', '/k', str(updater_script)], creationflags=subprocess.CREATE_NEW_CONSOLE)
+    #["powershell", "-Command", f'Start-Process cmd -ArgumentList "/k","{updater_script}" -Verb RunAs']
+    sys.exit(0)
