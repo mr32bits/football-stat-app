@@ -1,3 +1,4 @@
+import os
 import pathlib
 import shutil
 import subprocess
@@ -11,7 +12,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.1"
+__version__ = "0.0.0"
 
 os_name = platform.system().lower()
 system = "win" if "windows" in os_name else "mac"
@@ -23,7 +24,7 @@ if platform.system() == "Darwin":
     INSTALL_DIR = Path(sys.argv[0]).parent.parent.parent.parent
 elif platform.system() == "Windows":
     BASE_DIR = Path.home() / "AppData" / "Local" / "FootballStats"
-    INSTALL_DIR = Path(sys.argv[0]).parent
+    INSTALL_DIR = Path(os.getenv("LOCALAPPDATA")) / "Programs" / "FootballStats"
 else:
     print("Not Supported System")
 
@@ -43,6 +44,7 @@ def check_for_updates(active: bool = False) -> bool:
         METADATA_DIR.mkdir(parents=True, exist_ok=True)
         TARGET_DIR.mkdir(parents=True, exist_ok=True)
         EXTRACT_DIR.mkdir(parents=True, exist_ok=True)
+        INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
         if not Path(METADATA_DIR, "root.json").exists():
             with open(str(Path(METADATA_DIR, "root.json")), 'wb') as f:
