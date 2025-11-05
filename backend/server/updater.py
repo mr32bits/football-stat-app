@@ -129,25 +129,37 @@ def check_for_updates(active: bool = False) -> bool:
                     print(f"Installing update from {src_dir} → {dst_dir}")
                     from tufup.utils.platform_specific import remove_path
                         # Build a small one-off script that does the move after exit
+                    exe_name = "FootballStats.exe"
+                    exe_path = dst_dir / exe_name
                     updater_script = Path(os.getenv("TEMP")) / "tufup_update_helper.bat"
-                    exe_path = dst_dir / "FootballStats.exe"
 
                     with open(updater_script, "w", encoding="utf-8") as f:
-                        f.write(f"""
-                            @echo off
-                            echo Waiting for app to exit...
-                            timeout /t 2 >nul
+                        f.write(f"""@echo off
+                        setlocal
+                        echo Waiting for {exe_name} to close...
+                        set EXE="{exe_path}"
 
-                            echo Applying update...
-                            xcopy "{src_dir}\\*" "{dst_dir}\\" /E /Y /H
+                        :waitloop
+                        rem Check if the EXE is still locked
+                        2>nul (>>%EXE% echo.) && (
+                        echo File is free, continuing...
+                        ) || (
+                        echo File still in use, waiting 2 seconds...
+                        timeout /t 2 /nobreak >nul
+                        goto waitloop
+                        )
 
-                            echo Restarting app...
-                            start "" "{exe_path}"
+                        echo Copying new version...
+                        robocopy "{src_dir}" "{dst_dir}" /E /IS /IT /MOVE /R:5 /W:2 >nul
 
-                            echo Cleaning up...
-                            rmdir /S /Q "{src_dir}"
-                            del "%~f0"
-                            """)
+                        echo Restarting app...
+                        start "" "{exe_path}"
+
+                        echo Cleaning up temp files...
+                        rmdir /S /Q "{src_dir}"
+                        del "%~f0"
+                        exit
+                        """)
 
                     # Launch helper in background, then exit main app
                     print(f"[TUFUP] Launching updater helper: {updater_script}")
