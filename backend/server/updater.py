@@ -123,35 +123,35 @@ def check_for_updates(active: bool = False) -> bool:
                     symlinks: bool = False,
                     **kwargs,
                 ):
-                    src_dir = pathlib.Path(src_dir)
-                    dst_dir = pathlib.Path(dst_dir)
-                    exclude_from_purge = [pathlib.Path(p) for p in (exclude_from_purge or [])]
+                    src_dir = Path(src_dir)
+                    dst_dir = Path(dst_dir)
+                    exclude_from_purge = [Path(p) for p in (exclude_from_purge or [])]
                     print(f"Installing update from {src_dir} → {dst_dir}")
-                    dst_dir.mkdir(parents=True, exist_ok=True)
                     from tufup.utils.platform_specific import remove_path
-
-                    dst_dir.mkdir(parents=True, exist_ok=True)
-
-                    if purge_dst_dir:
-                        print("[TUFUP] Purging old files...")
-                        for path in dst_dir.iterdir():
-                            if path not in exclude_from_purge:
-                                remove_path(path=path)
-
-                    print("[TUFUP] Copying files...")
-                    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
-
-                    print("[TUFUP] Cleaning up temporary files...")
-                    for path in src_dir.iterdir():
-                        remove_path(path=path)
-
+                        # Build a small one-off script that does the move after exit
+                    updater_script = Path(os.getenv("TEMP")) / "tufup_update_helper.bat"
                     exe_path = dst_dir / "FootballStats.exe"
-                    print(f"[TUFUP] Restarting {exe_path}...")
-                    if exe_path.exists():
-                        subprocess.Popen([str(exe_path)], shell=True)
-                    else:
-                        print("[TUFUP] WARNING: Could not find FootballStats.exe to restart.")
 
+                    with open(updater_script, "w", encoding="utf-8") as f:
+                        f.write(f"""
+                            @echo off
+                            echo Waiting for app to exit...
+                            timeout /t 2 >nul
+
+                            echo Applying update...
+                            xcopy "{src_dir}\\*" "{dst_dir}\\" /E /Y /H
+
+                            echo Restarting app...
+                            start "" "{exe_path}"
+
+                            echo Cleaning up...
+                            rmdir /S /Q "{src_dir}"
+                            del "%~f0"
+                            """)
+
+                    # Launch helper in background, then exit main app
+                    print(f"[TUFUP] Launching updater helper: {updater_script}")
+                    subprocess.Popen(['cmd', '/c', str(updater_script)], creationflags=subprocess.CREATE_NEW_CONSOLE)
                     sys.exit(0)
 
                 client.download_and_apply_update(skip_confirmation=True, install=custom_mac_install if platform.system() == "Darwin" else custom_windows_install)
