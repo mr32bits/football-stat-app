@@ -115,8 +115,46 @@ def check_for_updates(active: bool = False) -> bool:
 
                     #closing app
                     sys.exit(0)
+                def custom_windows_install(
+                    src_dir: str,
+                    dst_dir: str,
+                    purge_dst_dir: bool = False,
+                    exclude_from_purge=None,
+                    symlinks: bool = False,
+                    **kwargs,
+                ):
+                    src_dir = pathlib.Path(src_dir)
+                    dst_dir = pathlib.Path(dst_dir)
+                    exclude_from_purge = [pathlib.Path(p) for p in (exclude_from_purge or [])]
+                    print(f"Installing update from {src_dir} → {dst_dir}")
+                    dst_dir.mkdir(parents=True, exist_ok=True)
+                    from tufup.utils.platform_specific import remove_path
 
-                client.download_and_apply_update(skip_confirmation=True, install=custom_mac_install if platform.system() == "Darwin" else None)
+                    dst_dir.mkdir(parents=True, exist_ok=True)
+
+                    if purge_dst_dir:
+                        print("[TUFUP] Purging old files...")
+                        for path in dst_dir.iterdir():
+                            if path not in exclude_from_purge:
+                                remove_path(path=path)
+
+                    print("[TUFUP] Copying files...")
+                    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+
+                    print("[TUFUP] Cleaning up temporary files...")
+                    for path in src_dir.iterdir():
+                        remove_path(path=path)
+
+                    exe_path = dst_dir / "FootballStats.exe"
+                    print(f"[TUFUP] Restarting {exe_path}...")
+                    if exe_path.exists():
+                        subprocess.Popen([str(exe_path)], shell=True)
+                    else:
+                        print("[TUFUP] WARNING: Could not find FootballStats.exe to restart.")
+
+                    sys.exit(0)
+
+                client.download_and_apply_update(skip_confirmation=True, install=custom_mac_install if platform.system() == "Darwin" else custom_windows_install)
                 return True
         elif active:
             print("Up to date", f"Current Version: {APP_VERSION}")
