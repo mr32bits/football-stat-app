@@ -12,7 +12,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.0"
+__version__ = "0.0.1"
 
 os_name = platform.system().lower()
 system = "win" if "windows" in os_name else "mac"
@@ -146,6 +146,9 @@ def custom_windows_install(
     exe_path = dst_dir / exe_name
     updater_script = Path(os.getenv("TEMP")) / "tufup_update_helper.bat"
 
+    args = " ".join(f'"{a}"' for a in sys.argv[1:])
+    print(f"Installing update from {src_dir} → {dst_dir} (args: {args})")
+
     with open(updater_script, "w", encoding="utf-8") as f:
         f.write(f"""@echo off
         echo ------------------------------
@@ -155,6 +158,8 @@ def custom_windows_install(
         set EXE="{exe_path}"
         set SRC="{src_dir}"
         set DST="{dst_dir}"
+        set ARGS={args}
+        echo "%ARGS%"
 
         echo Attempting to close running app...
         taskkill /IM {exe_name} /F >nul 2>&1
