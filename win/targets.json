@@ -2,12 +2,12 @@
  "signatures": [
   {
    "keyid": "6ee169a67390ba9a6dd167b43c22d8e294f2f303d64e8efd108eb43ca2bf3d38",
-   "sig": "658eb76cbdb8d3bb8e6e69c526821b57a5d7fc5fcc89b249f7cf749b378246d24aa87011ef039e14ea600d20455f1d40ddb7b7727bd731de144ef3cd2f46410c"
+   "sig": "512774a8e68cd131894159cd10150d1c79f9f94032b604e9263fa4cc04748496ac4043ff13cf308d52fccd86115333acff285fc5372b350757c9b613640c0c08"
   }
  ],
  "signed": {
   "_type": "targets",
-  "expires": "2026-02-03T16:32:50Z",
+  "expires": "2026-02-03T18:38:58Z",
   "spec_version": "1.0.31",
   "targets": {
    "FootballStats-win-0.0.1.tar.gz": {
@@ -18,11 +18,11 @@
      "user": null
     },
     "hashes": {
-     "sha256": "9b0bd12c469c70adbdd2ebce0f5e50bf35565eb30090385ab4dab586bcfa7205"
+     "sha256": "82070805a47a126b60891d7ef478f55ab247c6a7f868817e11f348c79c13156c"
     },
-    "length": 30696160
+    "length": 34914102
    }
   },
-  "version": 2
+  "version": 8
  }
 }
