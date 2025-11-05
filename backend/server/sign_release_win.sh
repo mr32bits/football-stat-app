@@ -29,13 +29,11 @@ cd ..
 echo -n "Confirm: "
 read -r 
 
-pyinstaller --clean --noconfirm server.spec
+# --- WIN ---
+if [ -f "${DIST_DIR}/${APP_NAME}.exe" ]; then
+    echo "Building Windows bundle..."
 
-# --- MACOS ---
-if [ -d "${DIST_DIR}/${APP_NAME}.exe" ]; then
-    echo "Building macOS bundle..."
-
-    echo "Signing macOS metadata..."
+    echo "Signing Windows metadata..."
     tar -czf "${DIST_DIR}/${APP_NAME}-win-${VERSION}.tar.gz" -C "${DIST_DIR}" "${APP_NAME}.exe"
     
     cd "${REPO_DIR}"
