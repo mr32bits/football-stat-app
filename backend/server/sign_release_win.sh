@@ -34,12 +34,14 @@ if [ -f "${DIST_DIR}/${APP_NAME}.exe" ]; then
     echo "Building Windows bundle..."
 
     echo "Signing Windows metadata..."
-    tar -czf "${DIST_DIR}/${APP_NAME}-win-${VERSION}.tar.gz" -C "${DIST_DIR}" "${APP_NAME}.exe"
     
+    mkdir -p tmp_pkg
+    cp -R "${DIST_DIR}/FootballStats.exe" "tmp_pkg"
     cd "${REPO_DIR}"
-    tufup targets add -r "${VERSION}" "../${DIST_DIR}/${APP_NAME}-win-${VERSION}.tar.gz" "keystore"
+    tufup targets add -r "${VERSION}" "../tmp_pkg" "keystore"
     tufup sign targets "keystore"
     cd ..
+    rm -rf tmp_pkg
 fi
 
 echo "Successfully updated"

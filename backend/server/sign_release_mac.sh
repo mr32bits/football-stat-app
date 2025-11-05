@@ -37,7 +37,7 @@ if [ -d "${DIST_DIR}/${APP_NAME}.app" ]; then
 
     echo "Signing macOS metadata..."
     mkdir -p tmp_pkg
-    cp -R dist/FootballStats.app tmp_pkg
+    cp -R "${DIST_DIR}/FootballStats.app" "tmp_pkg"
     cd "${REPO_DIR}"
     tufup targets add -r "${VERSION}" "../tmp_pkg" "keystore"
     tufup sign targets "keystore"
