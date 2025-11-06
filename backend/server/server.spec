@@ -10,6 +10,8 @@ api_path = os.path.join(spec_root, 'api')
 print("Building from:", spec_root)
 print("Platform:", sys.platform)
 
+console=False
+
 datas = []
 from PyInstaller.utils.hooks import collect_data_files
 datas += collect_data_files('rest_framework', include_py_files=True)
@@ -46,7 +48,7 @@ if sys.platform == "darwin":
         bootloader_ignore_signals=False,
         strip=False,
         upx=True,
-        console=True,
+        console=console,
         disable_windowed_traceback=False,
         argv_emulation=False,
         target_arch=None,
@@ -66,7 +68,7 @@ else:
         bootloader_ignore_signals=False,
         strip=False,
         upx=True,
-        console=True,
+        console=console,
         disable_windowed_traceback=False,
         argv_emulation=False,
         target_arch=None,
