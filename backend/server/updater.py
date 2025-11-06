@@ -173,8 +173,17 @@ def custom_windows_install(
         echo Applying update from %SRC% to %DST% ...
         robocopy "%SRC%" "%DST%" /E /IS /IT /MOVE /R:5 /W:2 >nul
 
-        echo Waiting for OS to release file handles...
-        timeout /t 3 /nobreak >nul
+        echo Waiting for %EXE% to be ready...
+        :wait_ready
+        (
+        >"%EXE%" echo. >nul 2>&1
+        ) && (
+        echo Ready!
+        ) || (
+        echo File still busy, retrying in 2 seconds...
+        timeout /t 2 /nobreak >nul
+        goto wait_ready
+        )
 
         echo Restarting app...
         pushd "%DST%"
