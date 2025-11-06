@@ -12,7 +12,7 @@ from tufup.client import Client
 from pathlib import Path
 import platform
 
-__version__ = "0.0.1"
+__version__ = "0.0.0"
 
 os_name = platform.system().lower()
 system = "win" if "windows" in os_name else "mac"
@@ -172,6 +172,9 @@ def custom_windows_install(
 
         echo Applying update from %SRC% to %DST% ...
         robocopy "%SRC%" "%DST%" /E /IS /IT /MOVE /R:5 /W:2 >nul
+
+        echo Waiting for OS to release file handles...
+        timeout /t 3 /nobreak >nul
 
         echo Restarting app...
         pushd "%DST%"
