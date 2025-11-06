@@ -186,10 +186,8 @@ def custom_windows_install(
         )
 
         echo Restarting app...
-        timeout /t 20 >nul
-        pushd "%DST%"
-        start "" "FootballStats.exe"
-        popd
+        timeout /t 10 >nul
+        explorer "%DST%\FootballStats.exe"
 
         echo Cleaning up temp files...
         rmdir /S /Q "%SRC%" >nul
@@ -201,7 +199,7 @@ def custom_windows_install(
 
     # Launch helper in background, then exit main app
     print(f"[TUFUP] Launching updater helper: {updater_script}")
-    subprocess.Popen(['cmd', '/c', str(updater_script)], creationflags=subprocess.CREATE_NEW_CONSOLE)
-    #["powershell", "-Command", f'Start-Process cmd -ArgumentList "/k","{updater_script}" -Verb RunAs']
+    #TODO FIXME replace /k with /c to close the window
+    subprocess.Popen(['cmd', '/k', str(updater_script)], cwd=str(dst_dir), creationflags=subprocess.CREATE_NEW_CONSOLE)
     print("[TUFUP] Exiting app to allow update...")
     sys.exit(0)
