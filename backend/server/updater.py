@@ -186,6 +186,7 @@ def custom_windows_install(
         )
 
         echo Restarting app...
+        timeout /t 20 >nul
         pushd "%DST%"
         start "" "FootballStats.exe"
         popd
