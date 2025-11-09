@@ -89,10 +89,6 @@ jobs:
           mkdir -p "../../${DEST}"
           mv -f metadata/* "../../${DEST}/"
 
-          ls -la -R metadata
-          echo "----------------"
-          stat -la -R "../../${DEST}/"
-
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
         env:
