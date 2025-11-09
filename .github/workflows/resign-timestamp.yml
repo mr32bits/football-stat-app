@@ -76,7 +76,7 @@ jobs:
         run: |
           set -e
           REPO_DIR=backend/server/repo-win
-          DEST=gh-pages/win/metadata
+          DEST=gh-pages/win
 
           cd "${REPO_DIR}"
           tufup sign timestamp keystore -d -e 7
@@ -88,7 +88,7 @@ jobs:
         run: |
           set -e
           REPO_DIR=backend/server/repo-mac
-          DEST=gh-pages/mac/metadata
+          DEST=gh-pages/mac
 
           cd "${REPO_DIR}"
           tufup sign timestamp keystore -d -e 7
@@ -101,9 +101,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cd gh-pages
+          ls
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add mac/metadata win/metadata
+
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+          git add mac win
           git commit -m "Auto-refresh TUF metadata" || echo "No changes to commit"
           git push origin gh-pages
 
