@@ -66,6 +66,12 @@ jobs:
           echo "$TARGETS_KEY_MAC"   | base64 --decode > backend/server/repo-mac/keystore/targets
           echo "$TIMESTAMP_KEY_MAC" | base64 --decode > backend/server/repo-mac/keystore/timestamp
 
+      - name: Sync latest gh-pages metadata into local repo folders
+        run: |
+          mkdir -p gh-pages/win gh-pages/mac
+          rsync -av --delete gh-pages/win/ backend/server/repo-win/metadata/
+          rsync -av --delete gh-pages/mac/ backend/server/repo-mac/metadata/
+
       - name: Refresh (sign) Windows metadata and copy to gh-pages
         run: |
           set -e
