@@ -1,8 +1,8 @@
-name: Resign TUF Metadata - Timestamp
+name: Resign TUF Metadata - Snapshot
 
 on:
   schedule:
-    - cron: "0 0 * * 0" # every Sunday at midnight UTC
+    - cron: "0 0 1 * *" # every 1th day of the month at midnight UTC
   workflow_dispatch:
 
 jobs:
@@ -72,7 +72,7 @@ jobs:
           DEST=gh-pages/win
 
           cd "${REPO_DIR}"
-          tufup sign timestamp keystore -d -e 7
+          tufup sign snapshot keystore -d -e 7
 
           mkdir -p "../../../${DEST}"
           mv -f metadata/* "../../../${DEST}/"
@@ -84,7 +84,7 @@ jobs:
           DEST=gh-pages/mac
 
           cd "${REPO_DIR}"
-          tufup sign timestamp keystore -d -e 7
+          tufup sign snapshot keystore -d -e 7
 
           mkdir -p "../../../${DEST}"
           mv -f metadata/* "../../../${DEST}/"
