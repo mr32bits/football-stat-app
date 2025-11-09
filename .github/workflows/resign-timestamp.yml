@@ -75,7 +75,7 @@ jobs:
           tufup sign timestamp keystore -d -e 7
 
           mkdir -p "../../${DEST}"
-          cp -a metadata/. "../../${DEST}/"
+          mv -f metadata/* "../../${DEST}/"
 
       - name: Refresh (sign) mac metadata and copy to gh-pages
         run: |
@@ -87,7 +87,7 @@ jobs:
           tufup sign timestamp keystore -d -e 7
 
           mkdir -p "../../${DEST}"
-          mv -f metadata "../../${DEST}/"
+          mv -f metadata/* "../../${DEST}/"
 
           ls -la -R metadata
           echo "----------------"
