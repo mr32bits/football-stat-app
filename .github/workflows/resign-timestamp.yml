@@ -33,13 +33,6 @@ jobs:
       - name: Install tufup
         run: pip install tufup
 
-      - name: Refresh TUF metadata
-        run: |
-          cd backend/server/repo-win
-          tufup sign timestamp keystore -d -e 7
-          cd ../repo-mac
-          tufup sign timestamp keystore -d -e 7
-
       - name: Write keystores to temp files
         env:
           ROOT_KEY_MAC: ${{ secrets.TUF_MAC_KEY_ROOT }}
@@ -95,13 +88,13 @@ jobs:
 
           mkdir -p "../../${DEST}"
           cp -a metadata/. "../../${DEST}/"
+          ls -la -R
 
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls -la
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -115,7 +108,5 @@ jobs:
       - name: Cleanup secrets
         if: always()
         run: |
-          rm -rf backend/server/repo-mac/keystore
-          rm -rf backend/server/repo-mac/metadata
-          rm -rf backend/server/repo-win/keystore
-          rm -rf backend/server/repo-win/metadata
+          rm -rf backend/server/repo-*/keystore
+          rm -rf backend/server/repo-*/metadata
