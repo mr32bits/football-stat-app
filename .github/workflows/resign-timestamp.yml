@@ -87,19 +87,13 @@ jobs:
           tufup sign timestamp keystore -d -e 7
 
           mkdir -p "../../../${DEST}"
-          cat metadata/timestamp.json
           mv -f metadata/* "../../../${DEST}/"
-          realpath "../../../${DEST}/"
 
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          realpath .
-          ls -la -R .
-          cat mac/timestamp.json
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
