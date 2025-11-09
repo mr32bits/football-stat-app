@@ -87,8 +87,11 @@ jobs:
           tufup sign timestamp keystore -d -e 7
 
           mkdir -p "../../${DEST}"
-          cp -a metadata/. "../../${DEST}/"
-          ls -la -R
+          cp -a metadata "../../${DEST}/"
+
+          ls -la -R metadata
+          echo "----------------"
+          ls -la -R "../../${DEST}/"
 
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
