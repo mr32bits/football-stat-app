@@ -52,19 +52,19 @@ jobs:
           TARGETS_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TARGETS }}
           TIMESTAMP_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TIMESTAMP }}
         run: |
-          mkdir -p /tmp/keystore/win
-          echo "$ROOT_KEY_WIN"      | base64 --decode > /tmp/keystore/win/root
-          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > /tmp/keystore/win/snapshot
-          echo "$TARGETS_KEY_WIN"   | base64 --decode > /tmp/keystore/win/targets
-          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > /tmp/keystore/win/timestamp
+          mkdir -p backend/server/repo-win/keystore
+          mkdir -p backend/server/repo-win/metadata
+          echo "$ROOT_KEY_WIN"      | base64 --decode > backend/server/repo-win/keystore/root
+          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > backend/server/repo-win/keystore/snapshot
+          echo "$TARGETS_KEY_WIN"   | base64 --decode > backend/server/repo-win/keystore/targets
+          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > backend/server/repo-win/keystore/timestamp
 
-          mkdir -p /tmp/keystore/mac
-          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/mac/root
-          echo "$SNAPSHOT_KEY_MAC"  | base64 --decode > /tmp/keystore/mac/snapshot
-          echo "$TARGETS_KEY_MAC"   | base64 --decode > /tmp/keystore/mac/targets
-          echo "$TIMESTAMP_KEY_MAC" | base64 --decode > /tmp/keystore/mac/timestamp
-          chmod 600 /tmp/keystore/win/*
-          chmod 600 /tmp/keystore/mac/*
+          mkdir -p backend/server/repo-mac/keystore
+          mkdir -p backend/server/repo-mac/metadata
+          echo "$ROOT_KEY_MAC"      | base64 --decode > backend/server/repo-mac/keystore/root
+          echo "$SNAPSHOT_KEY_MAC"  | base64 --decode > backend/server/repo-mac/keystore/snapshot
+          echo "$TARGETS_KEY_MAC"   | base64 --decode > backend/server/repo-mac/keystore/targets
+          echo "$TIMESTAMP_KEY_MAC" | base64 --decode > backend/server/repo-mac/keystore/timestamp
 
       - name: Refresh (sign) Windows metadata and copy to gh-pages
         run: |
@@ -106,4 +106,8 @@ jobs:
 
       - name: Cleanup secrets
         if: always()
-        run: rm -rf tmp/keystore/*
+        run: |
+          rm -rf backend/server/repo-mac/keystore
+          rm -rf backend/server/repo-mac/metadata
+          rm -rf backend/server/repo-win/keystore
+          rm -rf backend/server/repo-win/metadata
