@@ -88,13 +88,15 @@ jobs:
 
           mkdir -p "../../${DEST}"
           mv -f metadata/* "../../${DEST}/"
+          realpath "../../${DEST}/"
 
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pwd
+          realpath .
+          ls -la -R .
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
