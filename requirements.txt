@@ -22,4 +22,5 @@ sqlparse==0.5.3
 tuf==4.0.0
 tufup==0.10.0
 urllib3==2.5.0
+waitress==3.0.2
 whitenoise==6.11.0

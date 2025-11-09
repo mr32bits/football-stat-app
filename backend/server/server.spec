@@ -2,20 +2,31 @@
 
 import os
 import sys
+from pathlib import Path
 
 spec_root = os.path.abspath('')
 server_path = os.path.join(spec_root, 'server')
 api_path = os.path.join(spec_root, 'api')
 
+root = Path(spec_root).parent.parent
+third_party_licenses = root / "THIRD_PARTY_LICENSES.json"
+license = root / "LICENSE"
+
 print("Building from:", spec_root)
 print("Platform:", sys.platform)
+print("Root:", root)
+print("Third Licenses File:", third_party_licenses)
+print("Licenses File:", third_party_licenses)
 
 console=False
+#(api_path, 'api'), (server_path, 'server'),
 
 datas = []
 from PyInstaller.utils.hooks import collect_data_files
 datas += collect_data_files('rest_framework', include_py_files=True)
-datas += [(api_path, 'api'), (server_path, 'server'), (spec_root + '/staticfiles', 'staticfiles'), (spec_root + '/static', 'static'), (spec_root + '/templates', 'templates')]
+datas += [(spec_root + '/staticfiles', 'staticfiles'), (spec_root + '/static', 'static'), (spec_root + '/templates', 'templates'),
+    (third_party_licenses, '.'), (license, '.')
+]
 
 a = Analysis(
     ['launcher.py'],
@@ -31,7 +42,7 @@ a = Analysis(
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
-    optimize=0,
+    optimize=2 if sys.platform == "darwin" else 1,
 )
 pyz = PYZ(a.pure)
 

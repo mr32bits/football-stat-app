@@ -16,6 +16,12 @@ npm run dev
 
 ## Build Process
 
+Collecting the Python-Package Licenses
+
+```
+pip-licenses --format=json --with-license-file --no-license-path > THIRD_PARTY_LICENSES.json
+```
+
 ### Backend
 
 For a new Version change the version in `updater.py` to the format of `Version('vx.x.x-...')`.

@@ -17,13 +17,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-APP_NAME = "FootballStat"
+APP_NAME = "FootballStats"
 if sys.platform == "darwin":
-    # macOS: ~/Library/Application Support/FootballStat
     DATA_DIR = Path.home() / "Library" / "Application Support" / APP_NAME
 elif sys.platform == "win32":
-    # Windows: %APPDATA%\FootballStat
-    DATA_DIR = Path(os.getenv("APPDATA")) / APP_NAME
+    DATA_DIR = Path(os.getenv("LOCALAPPDATA")) / APP_NAME
 else:
     # Fallback for Linux or others
     DATA_DIR = Path.home() / f".{APP_NAME.lower()}"

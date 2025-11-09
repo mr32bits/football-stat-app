@@ -1,18 +1,19 @@
 import os
 import pathlib
+from pathlib import Path
 import shutil
 import subprocess
 import sys
 import time
 from tkinter import messagebox
-from pathlib import Path
+import tkinter
 from typing import List, Union
 import base64
+from tuf.api.exceptions import ExpiredMetadataError
 from tufup.client import Client
-from pathlib import Path
 import platform
 
-__version__ = "0.0.0"
+__version__ = "0.0.1"
 
 os_name = platform.system().lower()
 system = "win" if "windows" in os_name else "mac"
@@ -23,7 +24,7 @@ if platform.system() == "Darwin":
     BASE_DIR = Path.home() / "Library/Application Support" / "FootballStats"
     INSTALL_DIR = Path(sys.argv[0]).parent.parent.parent.parent
 elif platform.system() == "Windows":
-    BASE_DIR = Path.home() / "AppData" / "Local" / "FootballStats"
+    BASE_DIR = Path(os.getenv("LOCALAPPDATA")) / "FootballStats"
     INSTALL_DIR = Path(os.getenv("LOCALAPPDATA")) / "Programs" / "FootballStats"
 else:
     print("Not Supported System")
@@ -82,10 +83,14 @@ def check_for_updates(active: bool = False) -> bool:
             print("Up to date", f"Current Version: {APP_VERSION}")
             messagebox.showinfo("Up to date", f"Current Version: {APP_VERSION}")
         return False
-
+    except ExpiredMetadataError as expiredMetadataError:
+        print("TUF metadata expired")
+        messagebox.showwarning("Warning", "Expired Metada\nRetry later again or contact maintainer of Repository:\nhttps://github.com/mr32bits/football-stat-app")
     except Exception as tuf_error:
         print(f"TUF check failed ({tuf_error})")
-        print(f"{tuf_error.with_traceback()}")
+        tb = sys.exception().__traceback__
+        print(f"{tuf_error.with_traceback(tb)}")
+        messagebox.showerror(str(tuf_error),str(tuf_error.with_traceback(tb)))
     return False
 
 def custom_mac_install(src_dir: Union[pathlib.Path, str], dst_dir: Union[pathlib.Path, str], exclude_from_purge: List[Union[pathlib.Path, str]] = None, purge_dst_dir: bool =False, symlinks: bool = False, **kwargs):
@@ -149,7 +154,7 @@ def custom_windows_install(
     with open(updater_script, "w", encoding="utf-8") as f:
         f.write(f"""@echo off
         echo ------------------------------
-        echo FootballStats Updater
+        echo FootballStats Updater {__version__}
         echo ------------------------------
         setlocal enabledelayedexpansion
         set EXE="{exe_path}"
@@ -199,7 +204,6 @@ def custom_windows_install(
 
     # Launch helper in background, then exit main app
     print(f"[TUFUP] Launching updater helper: {updater_script}")
-    #TODO FIXME replace /k with /c to close the window
-    subprocess.Popen(['cmd', '/k', str(updater_script)], cwd=str(dst_dir), creationflags=subprocess.CREATE_NEW_CONSOLE)
+    subprocess.Popen(['cmd', '/c', str(updater_script)], cwd=str(dst_dir), creationflags=subprocess.CREATE_NEW_CONSOLE)
     print("[TUFUP] Exiting app to allow update...")
     sys.exit(0)

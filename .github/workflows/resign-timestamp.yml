@@ -1,0 +1,108 @@
+name: Resign TUF Metadata
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # every Sunday at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  refresh-tuf:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tufup
+        run: pip install tufup
+
+      - name: Refresh TUF metadata
+        run: |
+          cd backend/server/repo-win
+          tufup sign timestamp keystore -d -e 7
+          cd ../repo-mac
+          tufup sign timestamp keystore -d -e 7
+
+      - name: Write keystores to temp files
+        env:
+          ROOT_KEY_MAC: ${{ secrets.TUF_MAC_KEY_ROOT }}
+          TARGETS_KEY_MAC: ${{ secrets.TUF_MAC_KEY_TARGETS }}
+          SNAPSHOT_KEY_MAC: ${{ secrets.TUF_MAC_KEY_SNAPSHOT }}
+          TIMESTAMP_KEY_MAC: ${{ secrets.TUF_MAC_KEY_TIMESTAMP }}
+
+          ROOT_KEY_WIN: ${{ secrets.TUF_WIN_KEY_ROOT }}
+          TARGETS_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TARGETS }}
+          SNAPSHOT_KEY_WIN: ${{ secrets.TUF_WIN_KEY_SNAPSHOT }}
+          TIMESTAMP_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TIMESTAMP }}
+        run: |
+          mkdir -p /tmp/keystore/win
+          mkdir -p /tmp/keystore/mac
+          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/win/root
+          echo "$TARGETS_KEY_MAC"   | base64 --decode > /tmp/keystore/win/targets
+          echo "$SNAPSHOT_KEY_MAC"  | base64 --decode > /tmp/keystore/win/snapshot
+          echo "$TIMESTAMP_KEY_MAC" | base64 --decode > /tmp/keystore/win/timestamp
+
+          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/mac/root
+          echo "$TARGETS_KEY_WIN"   | base64 --decode > /tmp/keystore/mac/targets
+          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > /tmp/keystore/mac/snapshot
+          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > /tmp/keystore/mac/timestamp
+          chmod 600 /tmp/keystore/*
+
+      - name: Refresh (sign) Windows metadata and copy to gh-pages
+        run: |
+          set -e
+          REPO_DIR=backend/server/repo-win
+          DEST=gh-pages/win/metadata
+
+          # sign timestamp (or use 'all' if you want snapshot/targets too)
+          cd "${REPO_DIR}"
+          tufup sign timestamp /tmp/keystore/win -d -e 7
+
+          # Ensure destination exists and copy metadata
+          mkdir -p "../../${DEST}"
+          # copy entire metadata directory (overwrite)
+          cp -a metadata/. "../../${DEST}/"
+
+      - name: Refresh (sign) mac metadata and copy to gh-pages
+        run: |
+          set -e
+          REPO_DIR=backend/server/repo-mac
+          DEST=gh-pages/mac/metadata
+
+          cd "${REPO_DIR}"
+          tufup sign timestamp /tmp/keystore/mac -d -e 7
+
+          mkdir -p "../../${DEST}"
+          cp -a metadata/. "../../${DEST}/"
+
+      - name: Commit and push updated metadata to gh-pages
+        working-directory: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mac/metadata win/metadata
+          git commit -m "Auto-refresh TUF metadata" || echo "No changes to commit"
+          git push origin gh-pages
+
+      - name: Cleanup secrets
+        if: always()
+        run: rm -rf tmp/keystore/*

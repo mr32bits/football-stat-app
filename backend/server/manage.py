@@ -2,6 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from server.wsgi import get_wsgi_application
 
 def main():
     """Run administrative tasks."""
@@ -19,7 +20,6 @@ def main():
     import django.test
     from html.parser import HTMLParser
     execute_from_command_line(sys.argv)
-
 
 if __name__ == '__main__':
     main()
