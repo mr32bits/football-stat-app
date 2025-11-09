@@ -53,17 +53,18 @@ jobs:
           TIMESTAMP_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TIMESTAMP }}
         run: |
           mkdir -p /tmp/keystore/win
-          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/mac/root
-          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > /tmp/keystore/mac/snapshot
-          echo "$TARGETS_KEY_WIN"   | base64 --decode > /tmp/keystore/mac/targets
-          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > /tmp/keystore/mac/timestamp
+          echo "$ROOT_KEY_WIN"      | base64 --decode > /tmp/keystore/win/root
+          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > /tmp/keystore/win/snapshot
+          echo "$TARGETS_KEY_WIN"   | base64 --decode > /tmp/keystore/win/targets
+          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > /tmp/keystore/win/timestamp
 
           mkdir -p /tmp/keystore/mac
-          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/win/root
-          echo "$SNAPSHOT_KEY_MAC"  | base64 --decode > /tmp/keystore/win/snapshot
-          echo "$TARGETS_KEY_MAC"   | base64 --decode > /tmp/keystore/win/targets
-          echo "$TIMESTAMP_KEY_MAC" | base64 --decode > /tmp/keystore/win/timestamp
-          chmod 600 /tmp/keystore/*
+          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/mac/root
+          echo "$SNAPSHOT_KEY_MAC"  | base64 --decode > /tmp/keystore/mac/snapshot
+          echo "$TARGETS_KEY_MAC"   | base64 --decode > /tmp/keystore/mac/targets
+          echo "$TIMESTAMP_KEY_MAC" | base64 --decode > /tmp/keystore/mac/timestamp
+          chmod 600 /tmp/keystore/win/*
+          chmod 600 /tmp/keystore/mac/*
 
       - name: Refresh (sign) Windows metadata and copy to gh-pages
         run: |
