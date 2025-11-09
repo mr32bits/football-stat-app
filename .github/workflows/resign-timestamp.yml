@@ -97,6 +97,9 @@ jobs:
         run: |
           realpath .
           ls -la -R .
+          cat win/timestamp.json
+          cat mac/timestamp.json
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
