@@ -90,6 +90,8 @@ jobs:
           mv -f metadata/* "../../${DEST}/"
           realpath "../../${DEST}/"
 
+          cat metadata/timestamp.json
+
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
         env:
@@ -97,7 +99,6 @@ jobs:
         run: |
           realpath .
           ls -la -R .
-          cat win/timestamp.json
           cat mac/timestamp.json
 
           git config user.name "github-actions[bot]"
