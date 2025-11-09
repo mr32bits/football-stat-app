@@ -74,8 +74,8 @@ jobs:
           cd "${REPO_DIR}"
           tufup sign timestamp keystore -d -e 7
 
-          mkdir -p "../../${DEST}"
-          mv -f metadata/* "../../${DEST}/"
+          mkdir -p "../../../${DEST}"
+          mv -f metadata/* "../../../${DEST}/"
 
       - name: Refresh (sign) mac metadata and copy to gh-pages
         run: |
@@ -86,10 +86,10 @@ jobs:
           cd "${REPO_DIR}"
           tufup sign timestamp keystore -d -e 7
 
-          mkdir -p "../../${DEST}"
+          mkdir -p "../../../${DEST}"
           cat metadata/timestamp.json
-          mv -f metadata/* "../../${DEST}/"
-          realpath "../../${DEST}/"
+          mv -f metadata/* "../../../${DEST}/"
+          realpath "../../../${DEST}/"
 
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
