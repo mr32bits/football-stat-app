@@ -101,7 +101,8 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
 
-          git add mac win
+          git add .
+          git status
           git commit -m "Auto-refresh TUF metadata" || echo "No changes to commit"
           git push origin gh-pages
 
