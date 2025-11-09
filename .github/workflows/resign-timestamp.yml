@@ -87,18 +87,18 @@ jobs:
           tufup sign timestamp keystore -d -e 7
 
           mkdir -p "../../${DEST}"
-          cp -a metadata "../../${DEST}/"
+          mv -f metadata "../../${DEST}/"
 
           ls -la -R metadata
           echo "----------------"
-          ls -la -R "../../${DEST}/"
+          stat -la -R "../../${DEST}/"
 
       - name: Commit and push updated metadata to gh-pages
         working-directory: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls -la -R .
+          pwd
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
