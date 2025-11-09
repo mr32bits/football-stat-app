@@ -72,13 +72,10 @@ jobs:
           REPO_DIR=backend/server/repo-win
           DEST=gh-pages/win/metadata
 
-          # sign timestamp (or use 'all' if you want snapshot/targets too)
           cd "${REPO_DIR}"
-          tufup sign timestamp /tmp/keystore/win -d -e 7
+          tufup sign timestamp "${REPO_DIR}/keystore" -d -e 7
 
-          # Ensure destination exists and copy metadata
           mkdir -p "../../${DEST}"
-          # copy entire metadata directory (overwrite)
           cp -a metadata/. "../../${DEST}/"
 
       - name: Refresh (sign) mac metadata and copy to gh-pages
@@ -88,7 +85,7 @@ jobs:
           DEST=gh-pages/mac/metadata
 
           cd "${REPO_DIR}"
-          tufup sign timestamp /tmp/keystore/mac -d -e 7
+          tufup sign timestamp "${REPO_DIR}/keystore" -d -e 7
 
           mkdir -p "../../${DEST}"
           cp -a metadata/. "../../${DEST}/"
