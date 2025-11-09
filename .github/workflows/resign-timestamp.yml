@@ -43,26 +43,26 @@ jobs:
       - name: Write keystores to temp files
         env:
           ROOT_KEY_MAC: ${{ secrets.TUF_MAC_KEY_ROOT }}
-          TARGETS_KEY_MAC: ${{ secrets.TUF_MAC_KEY_TARGETS }}
           SNAPSHOT_KEY_MAC: ${{ secrets.TUF_MAC_KEY_SNAPSHOT }}
+          TARGETS_KEY_MAC: ${{ secrets.TUF_MAC_KEY_TARGETS }}
           TIMESTAMP_KEY_MAC: ${{ secrets.TUF_MAC_KEY_TIMESTAMP }}
 
           ROOT_KEY_WIN: ${{ secrets.TUF_WIN_KEY_ROOT }}
-          TARGETS_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TARGETS }}
           SNAPSHOT_KEY_WIN: ${{ secrets.TUF_WIN_KEY_SNAPSHOT }}
+          TARGETS_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TARGETS }}
           TIMESTAMP_KEY_WIN: ${{ secrets.TUF_WIN_KEY_TIMESTAMP }}
         run: |
           mkdir -p /tmp/keystore/win
+          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/mac/root
+          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > /tmp/keystore/mac/snapshot
+          echo "$TARGETS_KEY_WIN"   | base64 --decode > /tmp/keystore/mac/targets
+          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > /tmp/keystore/mac/timestamp
+
           mkdir -p /tmp/keystore/mac
           echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/win/root
-          echo "$TARGETS_KEY_MAC"   | base64 --decode > /tmp/keystore/win/targets
           echo "$SNAPSHOT_KEY_MAC"  | base64 --decode > /tmp/keystore/win/snapshot
+          echo "$TARGETS_KEY_MAC"   | base64 --decode > /tmp/keystore/win/targets
           echo "$TIMESTAMP_KEY_MAC" | base64 --decode > /tmp/keystore/win/timestamp
-
-          echo "$ROOT_KEY_MAC"      | base64 --decode > /tmp/keystore/mac/root
-          echo "$TARGETS_KEY_WIN"   | base64 --decode > /tmp/keystore/mac/targets
-          echo "$SNAPSHOT_KEY_WIN"  | base64 --decode > /tmp/keystore/mac/snapshot
-          echo "$TIMESTAMP_KEY_WIN" | base64 --decode > /tmp/keystore/mac/timestamp
           chmod 600 /tmp/keystore/*
 
       - name: Refresh (sign) Windows metadata and copy to gh-pages
