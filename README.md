@@ -1,57 +1,36 @@
 # Football Stat App
 
+![GitHub Tag](https://img.shields.io/github/v/tag/mr32bits/football-stat-app?label=Version&color=blue&link=https%3A%2F%2Fgithub.com%2Fmr32bits%2Ffootball-stat-app%2Freleases%2Flatest%2F)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/mr32bits/football-stat-app/build-exe.yml?label=EXE)
+
 # Development Process
 
-```zsh
+```bash
 cd backend/server
 python3 manage.py runserver
 ```
 
 and
 
-```zsh
+```bash
 cd frontend
 npm run dev
 ```
 
 ## Build Process
 
-Collecting the Python-Package Licenses
+Collecting the Third Party Package Licenses
 
-```
+```bash
 pip-licenses --format=json --with-license-file --no-license-path > THIRD_PARTY_LICENSES.json
+
+npm run build
+
+./backend/server/sign_release_*.sh
 ```
 
-### Backend
-
-For a new Version change the version in `updater.py` to the format of `Version('vx.x.x-...')`.
-
-```zsh
-cd backend/server
-pyinstaller --clean --nonfirm server.spec
-```
-
-#### MacOS
-
-```zsh
-cd backend/server/dist
-ditto -c -k --sequesterRsrc --keepParent "server.app" "macos.zip"
-```
+For a new Version change the version in `updater.py` to the format of `'x.x.x'`.
 
 ---
 
-### Frontend
-
-```zsh
-cd frontend
-npm run build
-```
-
 Move from gui: `.js` & `.css` to the `/static`-folder.<br> And move from gui: `index.html` to the `/templates`-folder
-
-## TODO
-
-- [ ] Player: Change the Players Goal Stats `{0: 2, 1: 3}`
-- [ ] FIX build-exe.yaml Compression
-
-CHANGE THE VERSION IN .tufup-repo-config and updater.py

@@ -2,7 +2,6 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from server.wsgi import get_wsgi_application
 
 def main():
     """Run administrative tasks."""

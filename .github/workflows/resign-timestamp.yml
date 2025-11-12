@@ -1,4 +1,4 @@
-name: Resign TUF Metadata - Timestamp
+name: Resign Timestamp
 
 on:
   schedule:
@@ -102,7 +102,7 @@ jobs:
 
           git add .
           git status
-          git commit -m "Auto-refresh TUF metadata" || echo "No changes to commit"
+          git commit -m "Auto-refresh TUF metadata - Timestamp" || echo "No changes to commit"
           git push origin gh-pages
 
       - name: Cleanup secrets

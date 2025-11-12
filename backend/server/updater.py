@@ -83,14 +83,18 @@ def check_for_updates(active: bool = False) -> bool:
             print("Up to date", f"Current Version: {APP_VERSION}")
             messagebox.showinfo("Up to date", f"Current Version: {APP_VERSION}")
         return False
+    
     except ExpiredMetadataError as expiredMetadataError:
-        print("TUF metadata expired")
-        messagebox.showwarning("Warning", "Expired Metada\nRetry later again or contact maintainer of Repository:\nhttps://github.com/mr32bits/football-stat-app")
+        print(f"TUF metadata expired ({expiredMetadataError})")
+        tb = sys.exception().__traceback__
+        print(f"{expiredMetadataError.with_traceback(tb)}")
+        messagebox.showwarning("Warning", f"Expired Metada: ({expiredMetadataError.with_traceback(tb)})\nRetry later again or contact maintainer of Repository:\nhttps://github.com/mr32bits/football-stat-app")
+
     except Exception as tuf_error:
         print(f"TUF check failed ({tuf_error})")
         tb = sys.exception().__traceback__
         print(f"{tuf_error.with_traceback(tb)}")
-        messagebox.showerror(str(tuf_error),str(tuf_error.with_traceback(tb)))
+        messagebox.showerror(str(tuf_error), str(tuf_error.with_traceback(tb)))
     return False
 
 def custom_mac_install(src_dir: Union[pathlib.Path, str], dst_dir: Union[pathlib.Path, str], exclude_from_purge: List[Union[pathlib.Path, str]] = None, purge_dst_dir: bool =False, symlinks: bool = False, **kwargs):
@@ -101,13 +105,7 @@ def custom_mac_install(src_dir: Union[pathlib.Path, str], dst_dir: Union[pathlib
 
     from tufup.utils.platform_specific import remove_path
     if purge_dst_dir:
-        exclude_from_purge = (
-            [  # enforce path objects
-                pathlib.Path(item) for item in exclude_from_purge
-            ]
-            if exclude_from_purge
-            else []
-        )
+        exclude_from_purge = ([pathlib.Path(item) for item in exclude_from_purge] if exclude_from_purge else [])
         for path in pathlib.Path(dst_dir).iterdir():
             if path not in exclude_from_purge:
                 remove_path(path=path)

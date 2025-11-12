@@ -19,7 +19,6 @@ print("Third Licenses File:", third_party_licenses)
 print("Licenses File:", third_party_licenses)
 
 console=False
-#(api_path, 'api'), (server_path, 'server'),
 
 datas = []
 from PyInstaller.utils.hooks import collect_data_files

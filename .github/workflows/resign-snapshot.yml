@@ -1,4 +1,4 @@
-name: Resign TUF Metadata - Snapshot
+name: Resign Snapshot
 
 on:
   schedule:
@@ -72,7 +72,7 @@ jobs:
           DEST=gh-pages/win
 
           cd "${REPO_DIR}"
-          tufup sign snapshot keystore -d -e 7
+          tufup sign snapshot keystore -d -e 30
 
           mkdir -p "../../../${DEST}"
           mv -f metadata/* "../../../${DEST}/"
@@ -102,7 +102,7 @@ jobs:
 
           git add .
           git status
-          git commit -m "Auto-refresh TUF metadata" || echo "No changes to commit"
+          git commit -m "Auto-refresh TUF metadata - Snapshot" || echo "No changes to commit"
           git push origin gh-pages
 
       - name: Cleanup secrets
